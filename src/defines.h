@@ -1,0 +1,5 @@
+#pragma once
+
+#include <stdio.h>
+
+#define SKL_LOG(test, ...) { char tempBuffer[256]{}; sprintf_s(tempBuffer, 256, test, ##__VA_ARGS__); printf("\n%s", tempBuffer); }

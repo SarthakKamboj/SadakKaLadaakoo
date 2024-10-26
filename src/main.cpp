@@ -7,21 +7,9 @@
 
 #include <windows.h>
 #include <WindowsX.h>
-#include <D3d12.h>
-#include <D3d12SDKLayers.h>
-#include <dxgi1_4.h>
-#include <wrl.h>
 
-#define SKL_LOG(test, ...) printf("\n%s", test, ##__VA_ARGS__)
-
-using namespace Microsoft::WRL;
-
-void initD3D12() {
-  ComPtr<ID3D12Device> device;
-  SKL_LOG("about to call D3D12CreateDevice");
-  HRESULT res = D3D12CreateDevice(NULL, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device));
-  SKL_LOG("res is success: %i for S_OK and %i for S_FALSE", res == S_OK, res == S_FALSE);
-}
+#include "gfx_api/skl_d3d12.h"
+#include "defines.h"
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -78,7 +66,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE disregard, PWSTR pCmdLineArgs
     name,
     L"SadakKaLadaakoo Game",
     WS_OVERLAPPEDWINDOW,
-    CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+    CW_USEDEFAULT, CW_USEDEFAULT, 800, 450,
     NULL,
     NULL,
     hInstance,
@@ -104,7 +92,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE disregard, PWSTR pCmdLineArgs
     ShowWindow(hwd, nShowState);
   }
 
-  initD3D12();
+  initD3D12(hwd);
 
   MSG msg{};
   while (GetMessage(&msg, NULL, 0, 0) > 0) {

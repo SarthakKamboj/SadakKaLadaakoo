@@ -7,6 +7,21 @@
 
 #include <windows.h>
 #include <WindowsX.h>
+#include <D3d12.h>
+#include <D3d12SDKLayers.h>
+#include <dxgi1_4.h>
+#include <wrl.h>
+
+#define SKL_LOG(test, ...) printf("\n%s", test, ##__VA_ARGS__)
+
+using namespace Microsoft::WRL;
+
+void initD3D12() {
+  ComPtr<ID3D12Device> device;
+  SKL_LOG("about to call D3D12CreateDevice");
+  HRESULT res = D3D12CreateDevice(NULL, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device));
+  SKL_LOG("res is success: %i for S_OK and %i for S_FALSE", res == S_OK, res == S_FALSE);
+}
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -14,11 +29,11 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
     case WM_CLOSE:
       {
-        if (MessageBox(hwnd, L"You sure you wanna quit brody?", L"caption", MB_OKCANCEL)) {
-          DestroyWindow(hwnd);
-        } else {
-          break;
-        }
+        // if (MessageBox(hwnd, L"You sure you wanna quit brody?", L"caption", MB_OKCANCEL)) {
+          // DestroyWindow(hwnd);
+        // } else {
+          // break;
+        // }
       }
 
     case WM_DESTROY:
@@ -31,7 +46,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
       {
         int x_pos = GET_X_LPARAM(lParam);
         int y_pos = GET_Y_LPARAM(lParam);
-        printf("x_pos: %i y_pos: %i\n", x_pos, y_pos);
+        SKL_LOG("x_pos: %i y_pos: %i", x_pos, y_pos);
       }
 
 
@@ -70,23 +85,26 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE disregard, PWSTR pCmdLineArgs
     NULL
   );
 
-  FILE* newFile = fopen("./output.txt", "w");
-  if (hwd == NULL) {
-    fprintf(newFile, "could not create window");
+  bool success = AllocConsole();
+  AttachConsole(GetCurrentProcessId());
+  // reroutes stdout FILE* stream to console "file"
+  freopen("CON", "w", stdout);
+  
+  if (!success) {
+    SKL_LOG("could not create console");
   } else {
-    fprintf(newFile, "created window successfully\n");
-    bool success = AllocConsole();
-    // reroutes stdout FILE* stream to console "file"
-    freopen("CON", "w", stdout);
-    if (!success) {
-      fprintf(newFile, "could not create console");
-    } else {
-      printf("created console");
-      fprintf(newFile, "created console");
-    }
+    SKL_LOG("created console");
+  }
+
+  if (hwd == NULL) {
+    SKL_LOG("could not create window");
+  } else {
+    SKL_LOG("created window successfully");
+    
     ShowWindow(hwd, nShowState);
   }
-  fclose(newFile);
+
+  initD3D12();
 
   MSG msg{};
   while (GetMessage(&msg, NULL, 0, 0) > 0) {

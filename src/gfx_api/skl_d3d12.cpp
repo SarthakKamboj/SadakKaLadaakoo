@@ -26,12 +26,14 @@ void hresult_log(HRESULT result) {
 
 void initD3D12(HWND hwnd) {
 
+  // create the dxgi factory (which seems to be the graphics separate logic responsible for churning out things to the OS (like how to present swap chain attachments))
   ComPtr<IDXGIFactory4> dxgiFactory;
   if (S_OK != CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory))) {
     SKL_LOG("dxgi factory could not be created");
     return;
   }
 
+  // enable debug layer
   ComPtr<ID3D12Debug> debugController;
   if (S_OK != D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))) {
     SKL_LOG("could not create debug interface");
@@ -39,12 +41,14 @@ void initD3D12(HWND hwnd) {
   }
   debugController->EnableDebugLayer();
 
+  // create the device, which is an instance of the D3d12 api
   ComPtr<ID3D12Device> device;
   if (S_OK != D3D12CreateDevice(NULL, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device))) {
     SKL_LOG("could not create device");
     return;
   }
 
+  // create the command queue on the device
   D3D12_COMMAND_QUEUE_DESC commandQueueDesc = {};
   commandQueueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
   commandQueueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
@@ -55,6 +59,7 @@ void initD3D12(HWND hwnd) {
     return;
   } 
 
+  // create the swap chain with the factory (probably because this is more on the side of communicating with the OS)
   ComPtr<IDXGISwapChain1> swapChain;
   DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
 
@@ -85,6 +90,8 @@ void initD3D12(HWND hwnd) {
   }
   int frameIndex = swapChain3->GetCurrentBackBufferIndex();
 
+  // WARNING: learn about what descriptors actually are
+  // create the heap of descriptors for the render target views
   ComPtr<ID3D12DescriptorHeap> descriptorHeap;
   D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
   heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
@@ -97,13 +104,7 @@ void initD3D12(HWND hwnd) {
     return;
   }
 
-#ifdef D3D12_RESOURCE_DESC1
-  SKL_LOG("D3D12_RESOURCE_DESC1 defined");
-#else
-  SKL_LOG("D3D12_RESOURCE_DESC1 not defined");
-#endif
-
-#if true
+  // for each of those render target view descriptors, convert the buffer from the swap chain backbuffer into a render target view and associate it with the render target view descriptor
   int rtvDescHandleSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
   CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(descriptorHeap->GetCPUDescriptorHandleForHeapStart());
   ComPtr<ID3D12Resource> renderTargets[2];
@@ -118,12 +119,12 @@ void initD3D12(HWND hwnd) {
     rtvHandle.Offset(1, rtvDescHandleSize);
   }
 
+  // create the command allocator for this device that will allocate the command lists that will contain the actual commands
   ComPtr<ID3D12CommandAllocator> commandAllocator;
   if (S_OK != device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator))) {
     SKL_LOG("could not create command allocator");
     return;
   }
-#endif
 
 
   SKL_LOG("successfully initialized D3d12");

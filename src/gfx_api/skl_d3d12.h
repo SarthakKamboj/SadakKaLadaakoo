@@ -1,7 +1,16 @@
 #pragma once
 
 #include <windows.h>
+#include <d3dx12.h>
+#include <D3d12.h>
+#include <D3d12SDKLayers.h>
+#include <dxgi.h>
+#include <dxgi1_2.h>
+#include <dxgi1_4.h>
+#include <d3dcompiler.h>
+#include <wrl.h>
 
+using namespace Microsoft::WRL;
 
 struct SKL_Position {
   float x = 0;
@@ -51,4 +60,28 @@ struct SKL_Vertex {
 #endif
 };
 
-void initD3D12(HWND hwnd);
+struct D3DContext {
+  int fenceValue = 0;
+  HANDLE eventHandle;
+  ComPtr<ID3D12Fence> fence;
+
+  ComPtr<ID3D12CommandQueue> commandQueue;
+  ComPtr<ID3D12GraphicsCommandList> commandList;
+  ComPtr<ID3D12CommandAllocator> commandAllocator;
+  ComPtr<ID3D12PipelineState> pipelineState;
+  ComPtr<ID3D12RootSignature> rootSig;
+  ComPtr<ID3D12Resource> renderTargets[2];
+  ComPtr<ID3D12DescriptorHeap> descriptorHeap;
+  ComPtr<ID3D12Device> device;
+  D3D12_VERTEX_BUFFER_VIEW vertBufferView;
+  ComPtr<ID3D12Resource> vertexBuffer;
+  D3D12_VIEWPORT viewport;
+  D3D12_RECT scissorRect;
+  unsigned int frameIndex = 0;
+  ComPtr<IDXGISwapChain3> swapChain3;
+
+};
+
+void initD3D12(HWND hwnd, D3DContext& context);
+void renderFrame(D3DContext& context);
+void sync(D3DContext& context);

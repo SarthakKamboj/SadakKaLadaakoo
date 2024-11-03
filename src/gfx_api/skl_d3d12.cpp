@@ -1,18 +1,8 @@
 #include "skl_d3d12.h"
 
-#include <d3dx12.h>
-
-#include <D3d12.h>
-#include <D3d12SDKLayers.h>
-#include <dxgi.h>
-#include <dxgi1_2.h>
-#include <dxgi1_4.h>
-#include <d3dcompiler.h>
-#include <wrl.h>
-
 #include "defines.h"
 
-using namespace Microsoft::WRL;
+// using namespace Microsoft::WRL;
 
 // TODO: learn about difference between DXGI and D3d12
 
@@ -26,7 +16,7 @@ void hresult_log(HRESULT result) {
   }
 }
 
-void initD3D12(HWND hwnd) {
+void initD3D12(HWND hwnd, D3DContext& context) {
 
   // create the dxgi factory (which seems to be the graphics separate logic responsible for churning out things to the OS (like how to present swap chain attachments))
   ComPtr<IDXGIFactory4> dxgiFactory;
@@ -44,8 +34,10 @@ void initD3D12(HWND hwnd) {
   debugController->EnableDebugLayer();
 
   // create the device, which is an instance of the D3d12 api
-  ComPtr<ID3D12Device> device;
-  if (S_OK != D3D12CreateDevice(NULL, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device))) {
+  ComPtr<IDXGIAdapter1> hardwareAdapter;
+  // GetHardwareAdapter(dxgiFactory.Get(), hardwareAdapter.GetAddressOf());
+  // GetHardwareAdapter(dxgiFactory.Get(), &hardwareAdapter);
+  if (S_OK != D3D12CreateDevice(NULL, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&context.device))) {
     SKL_LOG("could not create device");
     return;
   }
@@ -55,8 +47,7 @@ void initD3D12(HWND hwnd) {
   commandQueueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
   commandQueueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 
-  ComPtr<ID3D12CommandQueue> commandQueue;
-  if (S_OK != device->CreateCommandQueue(&commandQueueDesc, IID_PPV_ARGS(&commandQueue))) {
+  if (S_OK != context.device->CreateCommandQueue(&commandQueueDesc, IID_PPV_ARGS(&context.commandQueue))) {
     SKL_LOG("command queue is not created");
     return;
   } 
@@ -80,51 +71,46 @@ void initD3D12(HWND hwnd) {
   swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
   swapChainDesc.Flags = 0;
 
-  if (S_OK != dxgiFactory->CreateSwapChainForHwnd(commandQueue.Get(), hwnd, &swapChainDesc, NULL, NULL, &swapChain)) {
+  if (S_OK != dxgiFactory->CreateSwapChainForHwnd(context.commandQueue.Get(), hwnd, &swapChainDesc, NULL, NULL, &swapChain)) {
     SKL_LOG("could not create swap chain");
     return;
   }
 
-  ComPtr<IDXGISwapChain3> swapChain3;
-  if (S_OK != swapChain.As(&swapChain3)) {
+  if (S_OK != swapChain.As(&context.swapChain3)) {
     SKL_LOG("swap chain 3 could not be created");
     return;
   }
-  int frameIndex = swapChain3->GetCurrentBackBufferIndex();
+  context.frameIndex = context.swapChain3->GetCurrentBackBufferIndex();
 
   // descriptors/views describe Id3d resource objects (in this case a render target) 
   // a render target view is a type of descriptor for the render target
-  ComPtr<ID3D12DescriptorHeap> descriptorHeap;
   D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
   heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
   heapDesc.NumDescriptors = 2;
   heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
   heapDesc.NodeMask = 0;
 
-  if (S_OK != device->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&descriptorHeap))) {
+  if (S_OK != context.device->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&context.descriptorHeap))) {
     SKL_LOG("could not make render target view descriptor heap");
     return;
   }
 
   // for each of those render target view descriptors, convert the buffer from the swap chain backbuffer into a render target view and associate it with the render target view descriptor
-  int rtvDescHandleSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-  CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(descriptorHeap->GetCPUDescriptorHandleForHeapStart());
-  ComPtr<ID3D12Resource> renderTargets[2];
+  int rtvDescHandleSize = context.device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+  CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(context.descriptorHeap->GetCPUDescriptorHandleForHeapStart());
   for (int i = 0; i < heapDesc.NumDescriptors; i++) {
-    if (S_OK != swapChain3->GetBuffer(i, IID_PPV_ARGS(&renderTargets[i]))) {
+    if (S_OK != context.swapChain3->GetBuffer(i, IID_PPV_ARGS(&context.renderTargets[i]))) {
       SKL_LOG("could not get back buffer index %i from swapchain", i);
       return;
     }
 
-    D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
     // create a render target out of the swap chain buffer and associate it with the render target view
-    device->CreateRenderTargetView(renderTargets[i].Get(), NULL, rtvHandle);
+    context.device->CreateRenderTargetView(context.renderTargets[i].Get(), NULL, rtvHandle);
     rtvHandle.Offset(1, rtvDescHandleSize);
   }
 
   // create the command allocator for this device that will allocate the command lists that will contain the actual commands
-  ComPtr<ID3D12CommandAllocator> commandAllocator;
-  if (S_OK != device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator))) {
+  if (S_OK != context.device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&context.commandAllocator))) {
     SKL_LOG("could not create command allocator");
     return;
   }
@@ -142,8 +128,7 @@ void initD3D12(HWND hwnd) {
     SKL_LOG("could not serialize root signature");
     return;
   }
-  ComPtr<ID3D12RootSignature> rootSig;
-  if (S_OK != device->CreateRootSignature(0, serializedSig->GetBufferPointer(), serializedSig->GetBufferSize(), IID_PPV_ARGS(&rootSig))) {
+  if (S_OK != context.device->CreateRootSignature(0, serializedSig->GetBufferPointer(), serializedSig->GetBufferSize(), IID_PPV_ARGS(&context.rootSig))) {
     SKL_LOG("could not create root signature on device");
     return;
   }
@@ -163,7 +148,7 @@ void initD3D12(HWND hwnd) {
 
   // seems like graphics pipeline state is very much tied to a vertex and index buffer layout
   D3D12_GRAPHICS_PIPELINE_STATE_DESC pipelineStateDesc = {};
-  pipelineStateDesc.pRootSignature = rootSig.Get();
+  pipelineStateDesc.pRootSignature = context.rootSig.Get();
   pipelineStateDesc.VS.pShaderBytecode = vertexShader->GetBufferPointer();
   pipelineStateDesc.VS.BytecodeLength = vertexShader->GetBufferSize();
   pipelineStateDesc.PS.pShaderBytecode = pixelShader->GetBufferPointer();
@@ -200,19 +185,17 @@ void initD3D12(HWND hwnd) {
   pipelineStateDesc.NumRenderTargets = 1;
   pipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
-  ComPtr<ID3D12PipelineState> pipelineState;
-  if (S_OK != device->CreateGraphicsPipelineState(&pipelineStateDesc, IID_PPV_ARGS(&pipelineState))) {
+  if (S_OK != context.device->CreateGraphicsPipelineState(&pipelineStateDesc, IID_PPV_ARGS(&context.pipelineState))) {
     SKL_LOG("could not create graphics pipeline state object");
     return;
   }
 
-  ComPtr<ID3D12GraphicsCommandList> commandList;
-  if (S_OK != device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator.Get(), pipelineState.Get(), IID_PPV_ARGS(&commandList))) {
+  if (S_OK != context.device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, context.commandAllocator.Get(), context.pipelineState.Get(), IID_PPV_ARGS(&context.commandList))) {
     SKL_LOG("could not create command list");
     return;
   }
 
-  if (S_OK != commandList->Close()) {
+  if (S_OK != context.commandList->Close()) {
     SKL_LOG("could not close command list");
     return;
   }
@@ -244,21 +227,128 @@ void initD3D12(HWND hwnd) {
   vertBuffResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR ;
   vertBuffResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-  ComPtr<ID3D12Resource> vertexBuffer;
-  if (S_OK != device->CreateCommittedResource(&vertexBuffHeapProps, D3D12_HEAP_FLAG_NONE, &vertBuffResourceDesc, 
-                                                D3D12_RESOURCE_STATE_GENERIC_READ, NULL, IID_PPV_ARGS(&vertexBuffer))) {
+  if (S_OK != context.device->CreateCommittedResource(&vertexBuffHeapProps, D3D12_HEAP_FLAG_NONE, &vertBuffResourceDesc, 
+                                                D3D12_RESOURCE_STATE_GENERIC_READ, NULL, IID_PPV_ARGS(&context.vertexBuffer))) {
     SKL_LOG("could not create the vertex buffer");
     return;
   }
 
   void* vertexBufferDataPtr = NULL;
   D3D12_RANGE readRange = {0,0};
-  if (S_OK != vertexBuffer->Map(0, &readRange, &vertexBufferDataPtr)) {
+  if (S_OK != context.vertexBuffer->Map(0, &readRange, &vertexBufferDataPtr)) {
     SKL_LOG("could not get the data ptr of the data referenced by the vertex buffer");
+    return;
   }
   memcpy(vertexBufferDataPtr, verts, verticesSize);
-  vertexBuffer->Unmap(0, &readRange);
+  context.vertexBuffer->Unmap(0, &readRange);
 
+  context.vertBufferView.BufferLocation = context.vertexBuffer->GetGPUVirtualAddress();
+  context.vertBufferView.SizeInBytes = verticesSize;
+  context.vertBufferView.StrideInBytes = sizeof(SKL_Vertex);
+
+  if (S_OK != context.device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&context.fence))) {
+    SKL_LOG("could not create fence");
+    return;
+  }
+  context.fenceValue = 1;
+
+  context.eventHandle = CreateEventA(NULL, false, false, NULL);
+  if (context.eventHandle == NULL) {
+    SKL_LOG("could not create event");
+    return;
+  }
+
+  context.viewport.TopLeftX = 0;
+  context.viewport.TopLeftY = 0;
+  context.viewport.Width = swapChainDesc.Width;
+  context.viewport.Height = swapChainDesc.Height;
+  context.viewport.MinDepth = 0;
+  context.viewport.MaxDepth = 0;
+
+  context.scissorRect = rect;
+
+  sync(context);
 
   SKL_LOG("successfully initialized D3d12");
+}
+
+void renderFrame(D3DContext& context) {
+
+  if (S_OK != context.commandAllocator->Reset()) {
+    SKL_LOG("could not reset allocator");
+    return;
+  }
+
+  if (S_OK != context.commandList->Reset(context.commandAllocator.Get(), context.pipelineState.Get())) {
+    SKL_LOG("could not reset command list");
+    return;
+  }
+
+  context.commandList->SetGraphicsRootSignature(context.rootSig.Get());
+  context.commandList->RSSetViewports(1, &context.viewport);
+  context.commandList->RSSetScissorRects(1, &context.scissorRect);
+
+  // set to render target
+  {
+    D3D12_RESOURCE_BARRIER barrier = {};
+    barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+    barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+    barrier.Transition.pResource = context.renderTargets[context.frameIndex].Get();
+    barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+
+    context.commandList->ResourceBarrier(1, &barrier);
+  }
+
+  CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(context.descriptorHeap->GetCPUDescriptorHandleForHeapStart());
+  UINT rtvHandleSize = context.device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+  rtvHandle.Offset(context.frameIndex, rtvHandleSize);
+
+  static float color[4] = {0,0,0,1};
+  context.commandList->OMSetRenderTargets(1, &rtvHandle, false, NULL);
+  context.commandList->ClearRenderTargetView(rtvHandle, color, 0, NULL);
+  context.commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+  context.commandList->IASetVertexBuffers(0, 1, &context.vertBufferView);
+  context.commandList->DrawInstanced(3, 1, 0, 0);
+
+  // setting to present
+  {
+    D3D12_RESOURCE_BARRIER barrier = {};
+    barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+    barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+    barrier.Transition.pResource = context.renderTargets[context.frameIndex].Get();
+    barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+
+    context.commandList->ResourceBarrier(1, &barrier);
+  }
+
+  context.commandList->Close();
+
+  ID3D12CommandList* commandListsToExec[] = { context.commandList.Get() };
+  context.commandQueue->ExecuteCommandLists(1, commandListsToExec);
+  context.swapChain3->Present(1,0);
+
+  sync(context);
+
+  // SKL_LOG("successfully rendered frame");
+}
+
+void sync(D3DContext& context) {
+  unsigned int signalValue = context.fenceValue;
+  if (S_OK != context.commandQueue->Signal(context.fence.Get(), signalValue)) {
+    SKL_LOG("could not configure GPU to signal fence with signalValue: %i", signalValue);
+    return;
+  }
+  context.fenceValue++;
+
+  if (context.fence->GetCompletedValue() != signalValue) {
+    context.fence->SetEventOnCompletion(signalValue, context.eventHandle);
+    WaitForSingleObject(context.eventHandle, INFINITE);
+  }
+
+  context.frameIndex = context.swapChain3->GetCurrentBackBufferIndex();
 }

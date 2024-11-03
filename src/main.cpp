@@ -55,6 +55,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE disregard, PWSTR pCmdLineArgs
   const wchar_t name[] = L"SadakKaLadaakoo";
 
   WNDCLASS wc = {};
+  wc.style = CS_HREDRAW | CS_VREDRAW;
   wc.hInstance = hInstance;
   wc.lpszClassName = name;
   wc.lpfnWndProc = WindowProc;
@@ -89,15 +90,26 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE disregard, PWSTR pCmdLineArgs
   } else {
     SKL_LOG("created window successfully");
     
-    ShowWindow(hwd, nShowState);
   }
 
-  initD3D12(hwd);
+  D3DContext d3dContext;
+  initD3D12(hwd, d3dContext);
 
-  MSG msg{};
-  while (GetMessage(&msg, NULL, 0, 0) > 0) {
-    TranslateMessage(&msg);
-    DispatchMessage(&msg);
+  ShowWindow(hwd, nShowState);
+
+  bool running = true;
+  while (running) {
+    MSG msg{};
+    while (PeekMessage(&msg, hwd, 0, 0, PM_NOREMOVE)) {
+      bool quitMsg = GetMessage(&msg, NULL, 0, 0) == 0;
+      if (quitMsg) {
+        running = false;
+        break;
+      }
+      TranslateMessage(&msg);
+      DispatchMessage(&msg);
+    }
+    renderFrame(d3dContext);
   }
 
   return 0;

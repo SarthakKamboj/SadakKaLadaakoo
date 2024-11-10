@@ -77,6 +77,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE disregard, PWSTR pCmdLineArgs
   bool success = AllocConsole();
   AttachConsole(GetCurrentProcessId());
   // reroutes stdout FILE* stream to console "file"
+
   freopen("CON", "w", stdout);
   
   if (!success) {

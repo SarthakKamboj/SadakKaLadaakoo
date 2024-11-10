@@ -75,10 +75,14 @@ struct D3DContext {
   ComPtr<ID3D12Device> device;
   D3D12_VERTEX_BUFFER_VIEW vertBufferView;
   ComPtr<ID3D12Resource> vertexBuffer;
+
   D3D12_VIEWPORT viewport;
   D3D12_RECT scissorRect;
+
   unsigned int frameIndex = 0;
   ComPtr<IDXGISwapChain3> swapChain3;
+
+  bool valid_context = false;
 
 };
 

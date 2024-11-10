@@ -58,8 +58,11 @@ void initD3D12(HWND hwnd, D3DContext& context) {
 
   RECT rect = {};
   GetWindowRect(hwnd, &rect);
+  SKL_LOG("rect top: %i right: %i bottom: %i left: %i ", 
+        rect.top, rect.right, rect.bottom, rect.left);
   swapChainDesc.Width = rect.right - rect.left;
   swapChainDesc.Height = rect.bottom - rect.top;
+  SKL_LOG("swapchain width: %i height: %i ", swapChainDesc.Width, swapChainDesc.Height);
   swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
   swapChainDesc.Stereo = false;
   swapChainDesc.SampleDesc.Count = 1;
@@ -116,8 +119,18 @@ void initD3D12(HWND hwnd, D3DContext& context) {
   }
 
   D3D12_ROOT_SIGNATURE_DESC rootSigDesc{};
-  rootSigDesc.NumParameters = 0;
-  rootSigDesc.pParameters = NULL;
+
+  D3D12_ROOT_PARAMETER rootParameter = {};
+  rootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+  rootParameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+  rootParameter.Constants.Num32BitValues = 1;
+  rootParameter.Constants.ShaderRegister = 0;
+  rootParameter.Constants.RegisterSpace = 0;
+
+  rootSigDesc.NumParameters = 1;
+  rootSigDesc.pParameters = &rootParameter;
+  // rootSigDesc.NumParameters = 0;
+  // rootSigDesc.pParameters = NULL;
   rootSigDesc.NumStaticSamplers = 0;
   rootSigDesc.pStaticSamplers = NULL;
   rootSigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
@@ -134,14 +147,24 @@ void initD3D12(HWND hwnd, D3DContext& context) {
   }
 
   ComPtr<ID3DBlob> vertexShader;
+  ComPtr<ID3DBlob> vertShaderError;
   ComPtr<ID3DBlob> pixelShader;
+  ComPtr<ID3DBlob> pixelShaderError;
   const wchar_t* fileName = L"src\\shaders\\win\\shaders.glsl";
-  if (S_OK != D3DCompileFromFile(fileName, NULL, NULL, "VSMain", "vs_5_0", D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0, &vertexShader, NULL)) {
+  if (S_OK != D3DCompileFromFile(fileName, NULL, NULL, "VSMain", "vs_5_0", D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0, &vertexShader, &vertShaderError)) {
+    char* error_msg = (char*)malloc(vertShaderError->GetBufferSize()+1);
+    error_msg[vertShaderError->GetBufferSize()] = 0;
+    memcpy(error_msg, vertShaderError->GetBufferPointer(), vertShaderError->GetBufferSize());
+    SKL_LOG(error_msg);
     SKL_LOG("could not compile vertex shader");
     return;
   }
+  
 
-  if (S_OK != D3DCompileFromFile(fileName, NULL, NULL, "PSMain", "ps_5_0", D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0, &pixelShader, NULL)) {
+  if (S_OK != D3DCompileFromFile(fileName, NULL, NULL, "PSMain", "ps_5_0", D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0, &pixelShader, &pixelShaderError)) {
+    char* error_msg = (char*)malloc(pixelShaderError->GetBufferSize()+1);
+    error_msg[pixelShaderError->GetBufferSize()] = 0;
+    memcpy(error_msg, pixelShaderError->GetBufferPointer(), pixelShaderError->GetBufferSize());
     SKL_LOG("could not compile fragment shader");
     return;
   }
@@ -172,7 +195,7 @@ void initD3D12(HWND hwnd, D3DContext& context) {
   inputAssemElemDesc[1].SemanticIndex = 0;
   inputAssemElemDesc[1].Format = DXGI_FORMAT_R32G32B32A32_FLOAT ;
   inputAssemElemDesc[1].InputSlot = 0;
-  inputAssemElemDesc[1].AlignedByteOffset = 12;
+  inputAssemElemDesc[1].AlignedByteOffset = sizeof(SKL_Position);
   inputAssemElemDesc[1].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
   inputAssemElemDesc[1].InstanceDataStepRate = 0;
 
@@ -200,11 +223,19 @@ void initD3D12(HWND hwnd, D3DContext& context) {
     return;
   }
 
+#if 1
   SKL_Vertex verts[3] = {
     { { 0.0f, 0.25f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
     { { 0.25f, -0.25f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
     { { -0.25f, -0.25f,  0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } },
   };
+#else
+  SKL_Vertex verts[3] = {
+    { { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+    { { 0.25f, -1.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
+    { { -0.25f, -1.0f,  0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } },
+  };
+#endif
 
   int verticesSize = sizeof(SKL_Vertex) * 3;
 
@@ -265,11 +296,16 @@ void initD3D12(HWND hwnd, D3DContext& context) {
   context.viewport.MinDepth = 0;
   context.viewport.MaxDepth = 0;
 
-  context.scissorRect = rect;
+  context.scissorRect.top = 0;
+  context.scissorRect.bottom = swapChainDesc.Height;
+  context.scissorRect.left = 0;
+  context.scissorRect.right = swapChainDesc.Width;
 
   sync(context);
+  context.valid_context = true;
 
   SKL_LOG("successfully initialized D3d12");
+
 }
 
 void renderFrame(D3DContext& context) {
@@ -284,7 +320,14 @@ void renderFrame(D3DContext& context) {
     return;
   }
 
+  if (!context.valid_context) {
+    SKL_LOG("not valid context");
+  }
+
   context.commandList->SetGraphicsRootSignature(context.rootSig.Get());
+  float offset = 0.75f;
+  context.commandList->SetGraphicsRoot32BitConstants(0, 1, &offset, 0);
+
   context.commandList->RSSetViewports(1, &context.viewport);
   context.commandList->RSSetScissorRects(1, &context.scissorRect);
 
@@ -305,11 +348,11 @@ void renderFrame(D3DContext& context) {
   UINT rtvHandleSize = context.device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
   rtvHandle.Offset(context.frameIndex, rtvHandleSize);
 
-  static float color[4] = {0,0,0,1};
+  static float color[4] = {0,1,1,1};
   context.commandList->OMSetRenderTargets(1, &rtvHandle, false, NULL);
   context.commandList->ClearRenderTargetView(rtvHandle, color, 0, NULL);
   context.commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
+  
   context.commandList->IASetVertexBuffers(0, 1, &context.vertBufferView);
   context.commandList->DrawInstanced(3, 1, 0, 0);
 
@@ -333,8 +376,6 @@ void renderFrame(D3DContext& context) {
   context.swapChain3->Present(1,0);
 
   sync(context);
-
-  // SKL_LOG("successfully rendered frame");
 }
 
 void sync(D3DContext& context) {

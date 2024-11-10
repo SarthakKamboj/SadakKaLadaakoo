@@ -1,8 +1,9 @@
 #include "skl_d3d12.h"
 
+#include "app_state.h"
 #include "defines.h"
 
-// using namespace Microsoft::WRL;
+extern app_state_t app_state;
 
 // TODO: learn about difference between DXGI and D3d12
 
@@ -57,11 +58,11 @@ void initD3D12(HWND hwnd, D3DContext& context) {
   DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
 
   RECT rect = {};
-  GetWindowRect(hwnd, &rect);
+  GetClientRect(hwnd, &rect);
   SKL_LOG("rect top: %i right: %i bottom: %i left: %i ", 
         rect.top, rect.right, rect.bottom, rect.left);
-  swapChainDesc.Width = rect.right - rect.left;
-  swapChainDesc.Height = rect.bottom - rect.top;
+  swapChainDesc.Width = rect.right;
+  swapChainDesc.Height = rect.bottom;
   SKL_LOG("swapchain width: %i height: %i ", swapChainDesc.Width, swapChainDesc.Height);
   swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
   swapChainDesc.Stereo = false;
@@ -123,14 +124,12 @@ void initD3D12(HWND hwnd, D3DContext& context) {
   D3D12_ROOT_PARAMETER rootParameter = {};
   rootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
   rootParameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-  rootParameter.Constants.Num32BitValues = 1;
+  rootParameter.Constants.Num32BitValues = 2;
   rootParameter.Constants.ShaderRegister = 0;
   rootParameter.Constants.RegisterSpace = 0;
 
   rootSigDesc.NumParameters = 1;
   rootSigDesc.pParameters = &rootParameter;
-  // rootSigDesc.NumParameters = 0;
-  // rootSigDesc.pParameters = NULL;
   rootSigDesc.NumStaticSamplers = 0;
   rootSigDesc.pStaticSamplers = NULL;
   rootSigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
@@ -325,8 +324,8 @@ void renderFrame(D3DContext& context) {
   }
 
   context.commandList->SetGraphicsRootSignature(context.rootSig.Get());
-  float offset = 0.75f;
-  context.commandList->SetGraphicsRoot32BitConstants(0, 1, &offset, 0);
+  float mouse_pos[2] = {app_state.mouse_x * 2 - 1, (1-app_state.mouse_y) * 2 - 1};
+  context.commandList->SetGraphicsRoot32BitConstants(0, 2, &mouse_pos, 0);
 
   context.commandList->RSSetViewports(1, &context.viewport);
   context.commandList->RSSetScissorRects(1, &context.scissorRect);

@@ -10,6 +10,9 @@
 
 #include "gfx_api/skl_d3d12.h"
 #include "defines.h"
+#include "app_state.h"
+
+app_state_t app_state;
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -34,7 +37,10 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
       {
         int x_pos = GET_X_LPARAM(lParam);
         int y_pos = GET_Y_LPARAM(lParam);
-        SKL_LOG("x_pos: %i y_pos: %i", x_pos, y_pos);
+        RECT clientRect = {};
+        GetClientRect(hwnd, &clientRect);
+        app_state.mouse_x = ((float)x_pos) / clientRect.right;
+        app_state.mouse_y = ((float)y_pos) / clientRect.bottom;
       }
 
 

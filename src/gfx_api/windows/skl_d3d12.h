@@ -10,6 +10,10 @@
 #include <d3dcompiler.h>
 #include <wrl.h>
 
+#include "defines.h"
+#include "../renderer.h"
+#include "../windowing.h"
+
 using namespace Microsoft::WRL;
 
 struct SKL_Position {
@@ -60,6 +64,7 @@ struct SKL_Vertex {
 #endif
 };
 
+
 struct D3DContext {
   int fenceValue = 0;
   HANDLE eventHandle;
@@ -86,6 +91,6 @@ struct D3DContext {
 
 };
 
-void initD3D12(HWND hwnd, D3DContext& context);
-void renderFrame(D3DContext& context);
+void InitD3D12(HWND hwnd);
+void RenderD3D12Frame();
 void sync(D3DContext& context);

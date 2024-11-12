@@ -3,7 +3,9 @@
 #include "app_state.h"
 #include "defines.h"
 
-extern app_state_t app_state;
+D3DContext d3dContext;
+
+extern AppState g_appState;
 
 // TODO: learn about difference between DXGI and D3d12
 
@@ -17,7 +19,7 @@ void hresult_log(HRESULT result) {
   }
 }
 
-void initD3D12(HWND hwnd, D3DContext& context) {
+void InitD3D12(HWND hwnd) {
 
   // create the dxgi factory (which seems to be the graphics separate logic responsible for churning out things to the OS (like how to present swap chain attachments))
   ComPtr<IDXGIFactory4> dxgiFactory;
@@ -38,7 +40,7 @@ void initD3D12(HWND hwnd, D3DContext& context) {
   ComPtr<IDXGIAdapter1> hardwareAdapter;
   // GetHardwareAdapter(dxgiFactory.Get(), hardwareAdapter.GetAddressOf());
   // GetHardwareAdapter(dxgiFactory.Get(), &hardwareAdapter);
-  if (S_OK != D3D12CreateDevice(NULL, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&context.device))) {
+  if (S_OK != D3D12CreateDevice(NULL, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&d3dContext.device))) {
     SKL_LOG("could not create device");
     return;
   }
@@ -48,7 +50,7 @@ void initD3D12(HWND hwnd, D3DContext& context) {
   commandQueueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
   commandQueueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 
-  if (S_OK != context.device->CreateCommandQueue(&commandQueueDesc, IID_PPV_ARGS(&context.commandQueue))) {
+  if (S_OK != d3dContext.device->CreateCommandQueue(&commandQueueDesc, IID_PPV_ARGS(&d3dContext.commandQueue))) {
     SKL_LOG("command queue is not created");
     return;
   } 
@@ -75,16 +77,16 @@ void initD3D12(HWND hwnd, D3DContext& context) {
   swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
   swapChainDesc.Flags = 0;
 
-  if (S_OK != dxgiFactory->CreateSwapChainForHwnd(context.commandQueue.Get(), hwnd, &swapChainDesc, NULL, NULL, &swapChain)) {
+  if (S_OK != dxgiFactory->CreateSwapChainForHwnd(d3dContext.commandQueue.Get(), hwnd, &swapChainDesc, NULL, NULL, &swapChain)) {
     SKL_LOG("could not create swap chain");
     return;
   }
 
-  if (S_OK != swapChain.As(&context.swapChain3)) {
+  if (S_OK != swapChain.As(&d3dContext.swapChain3)) {
     SKL_LOG("swap chain 3 could not be created");
     return;
   }
-  context.frameIndex = context.swapChain3->GetCurrentBackBufferIndex();
+  d3dContext.frameIndex = d3dContext.swapChain3->GetCurrentBackBufferIndex();
 
   // descriptors/views describe Id3d resource objects (in this case a render target) 
   // a render target view is a type of descriptor for the render target
@@ -94,27 +96,27 @@ void initD3D12(HWND hwnd, D3DContext& context) {
   heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
   heapDesc.NodeMask = 0;
 
-  if (S_OK != context.device->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&context.descriptorHeap))) {
+  if (S_OK != d3dContext.device->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&d3dContext.descriptorHeap))) {
     SKL_LOG("could not make render target view descriptor heap");
     return;
   }
 
   // for each of those render target view descriptors, convert the buffer from the swap chain backbuffer into a render target view and associate it with the render target view descriptor
-  int rtvDescHandleSize = context.device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-  CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(context.descriptorHeap->GetCPUDescriptorHandleForHeapStart());
+  int rtvDescHandleSize = d3dContext.device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+  CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(d3dContext.descriptorHeap->GetCPUDescriptorHandleForHeapStart());
   for (int i = 0; i < heapDesc.NumDescriptors; i++) {
-    if (S_OK != context.swapChain3->GetBuffer(i, IID_PPV_ARGS(&context.renderTargets[i]))) {
+    if (S_OK != d3dContext.swapChain3->GetBuffer(i, IID_PPV_ARGS(&d3dContext.renderTargets[i]))) {
       SKL_LOG("could not get back buffer index %i from swapchain", i);
       return;
     }
 
     // create a render target out of the swap chain buffer and associate it with the render target view
-    context.device->CreateRenderTargetView(context.renderTargets[i].Get(), NULL, rtvHandle);
+    d3dContext.device->CreateRenderTargetView(d3dContext.renderTargets[i].Get(), NULL, rtvHandle);
     rtvHandle.Offset(1, rtvDescHandleSize);
   }
 
   // create the command allocator for this device that will allocate the command lists that will contain the actual commands
-  if (S_OK != context.device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&context.commandAllocator))) {
+  if (S_OK != d3dContext.device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&d3dContext.commandAllocator))) {
     SKL_LOG("could not create command allocator");
     return;
   }
@@ -140,7 +142,7 @@ void initD3D12(HWND hwnd, D3DContext& context) {
     SKL_LOG("could not serialize root signature");
     return;
   }
-  if (S_OK != context.device->CreateRootSignature(0, serializedSig->GetBufferPointer(), serializedSig->GetBufferSize(), IID_PPV_ARGS(&context.rootSig))) {
+  if (S_OK != d3dContext.device->CreateRootSignature(0, serializedSig->GetBufferPointer(), serializedSig->GetBufferSize(), IID_PPV_ARGS(&d3dContext.rootSig))) {
     SKL_LOG("could not create root signature on device");
     return;
   }
@@ -149,7 +151,7 @@ void initD3D12(HWND hwnd, D3DContext& context) {
   ComPtr<ID3DBlob> vertShaderError;
   ComPtr<ID3DBlob> pixelShader;
   ComPtr<ID3DBlob> pixelShaderError;
-  const wchar_t* fileName = L"src\\shaders\\win\\shaders.glsl";
+  const wchar_t* fileName = L"src\\shaders\\windows\\shaders.glsl";
   if (S_OK != D3DCompileFromFile(fileName, NULL, NULL, "VSMain", "vs_5_0", D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0, &vertexShader, &vertShaderError)) {
     char* error_msg = (char*)malloc(vertShaderError->GetBufferSize()+1);
     error_msg[vertShaderError->GetBufferSize()] = 0;
@@ -170,7 +172,7 @@ void initD3D12(HWND hwnd, D3DContext& context) {
 
   // seems like graphics pipeline state is very much tied to a vertex and index buffer layout
   D3D12_GRAPHICS_PIPELINE_STATE_DESC pipelineStateDesc = {};
-  pipelineStateDesc.pRootSignature = context.rootSig.Get();
+  pipelineStateDesc.pRootSignature = d3dContext.rootSig.Get();
   pipelineStateDesc.VS.pShaderBytecode = vertexShader->GetBufferPointer();
   pipelineStateDesc.VS.BytecodeLength = vertexShader->GetBufferSize();
   pipelineStateDesc.PS.pShaderBytecode = pixelShader->GetBufferPointer();
@@ -207,17 +209,17 @@ void initD3D12(HWND hwnd, D3DContext& context) {
   pipelineStateDesc.NumRenderTargets = 1;
   pipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
-  if (S_OK != context.device->CreateGraphicsPipelineState(&pipelineStateDesc, IID_PPV_ARGS(&context.pipelineState))) {
+  if (S_OK != d3dContext.device->CreateGraphicsPipelineState(&pipelineStateDesc, IID_PPV_ARGS(&d3dContext.pipelineState))) {
     SKL_LOG("could not create graphics pipeline state object");
     return;
   }
 
-  if (S_OK != context.device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, context.commandAllocator.Get(), context.pipelineState.Get(), IID_PPV_ARGS(&context.commandList))) {
+  if (S_OK != d3dContext.device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, d3dContext.commandAllocator.Get(), d3dContext.pipelineState.Get(), IID_PPV_ARGS(&d3dContext.commandList))) {
     SKL_LOG("could not create command list");
     return;
   }
 
-  if (S_OK != context.commandList->Close()) {
+  if (S_OK != d3dContext.commandList->Close()) {
     SKL_LOG("could not close command list");
     return;
   }
@@ -257,124 +259,124 @@ void initD3D12(HWND hwnd, D3DContext& context) {
   vertBuffResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR ;
   vertBuffResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-  if (S_OK != context.device->CreateCommittedResource(&vertexBuffHeapProps, D3D12_HEAP_FLAG_NONE, &vertBuffResourceDesc, 
-                                                D3D12_RESOURCE_STATE_GENERIC_READ, NULL, IID_PPV_ARGS(&context.vertexBuffer))) {
+  if (S_OK != d3dContext.device->CreateCommittedResource(&vertexBuffHeapProps, D3D12_HEAP_FLAG_NONE, &vertBuffResourceDesc, 
+                                                D3D12_RESOURCE_STATE_GENERIC_READ, NULL, IID_PPV_ARGS(&d3dContext.vertexBuffer))) {
     SKL_LOG("could not create the vertex buffer");
     return;
   }
 
   void* vertexBufferDataPtr = NULL;
   D3D12_RANGE readRange = {0,0};
-  if (S_OK != context.vertexBuffer->Map(0, &readRange, &vertexBufferDataPtr)) {
+  if (S_OK != d3dContext.vertexBuffer->Map(0, &readRange, &vertexBufferDataPtr)) {
     SKL_LOG("could not get the data ptr of the data referenced by the vertex buffer");
     return;
   }
   memcpy(vertexBufferDataPtr, verts, verticesSize);
-  context.vertexBuffer->Unmap(0, &readRange);
+  d3dContext.vertexBuffer->Unmap(0, &readRange);
 
-  context.vertBufferView.BufferLocation = context.vertexBuffer->GetGPUVirtualAddress();
-  context.vertBufferView.SizeInBytes = verticesSize;
-  context.vertBufferView.StrideInBytes = sizeof(SKL_Vertex);
+  d3dContext.vertBufferView.BufferLocation = d3dContext.vertexBuffer->GetGPUVirtualAddress();
+  d3dContext.vertBufferView.SizeInBytes = verticesSize;
+  d3dContext.vertBufferView.StrideInBytes = sizeof(SKL_Vertex);
 
-  if (S_OK != context.device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&context.fence))) {
+  if (S_OK != d3dContext.device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&d3dContext.fence))) {
     SKL_LOG("could not create fence");
     return;
   }
-  context.fenceValue = 1;
+  d3dContext.fenceValue = 1;
 
-  context.eventHandle = CreateEventA(NULL, false, false, NULL);
-  if (context.eventHandle == NULL) {
+  d3dContext.eventHandle = CreateEventA(NULL, false, false, NULL);
+  if (d3dContext.eventHandle == NULL) {
     SKL_LOG("could not create event");
     return;
   }
 
-  context.viewport.TopLeftX = 0;
-  context.viewport.TopLeftY = 0;
-  context.viewport.Width = swapChainDesc.Width;
-  context.viewport.Height = swapChainDesc.Height;
-  context.viewport.MinDepth = 0;
-  context.viewport.MaxDepth = 0;
+  d3dContext.viewport.TopLeftX = 0;
+  d3dContext.viewport.TopLeftY = 0;
+  d3dContext.viewport.Width = swapChainDesc.Width;
+  d3dContext.viewport.Height = swapChainDesc.Height;
+  d3dContext.viewport.MinDepth = 0;
+  d3dContext.viewport.MaxDepth = 0;
 
-  context.scissorRect.top = 0;
-  context.scissorRect.bottom = swapChainDesc.Height;
-  context.scissorRect.left = 0;
-  context.scissorRect.right = swapChainDesc.Width;
+  d3dContext.scissorRect.top = 0;
+  d3dContext.scissorRect.bottom = swapChainDesc.Height;
+  d3dContext.scissorRect.left = 0;
+  d3dContext.scissorRect.right = swapChainDesc.Width;
 
-  sync(context);
-  context.valid_context = true;
+  sync(d3dContext);
+  d3dContext.valid_context = true;
 
   SKL_LOG("successfully initialized D3d12");
 
 }
 
-void renderFrame(D3DContext& context) {
+void RenderD3D12Frame() {
 
-  if (S_OK != context.commandAllocator->Reset()) {
+  if (S_OK != d3dContext.commandAllocator->Reset()) {
     SKL_LOG("could not reset allocator");
     return;
   }
 
-  if (S_OK != context.commandList->Reset(context.commandAllocator.Get(), context.pipelineState.Get())) {
+  if (S_OK != d3dContext.commandList->Reset(d3dContext.commandAllocator.Get(), d3dContext.pipelineState.Get())) {
     SKL_LOG("could not reset command list");
     return;
   }
 
-  if (!context.valid_context) {
+  if (!d3dContext.valid_context) {
     SKL_LOG("not valid context");
   }
 
-  context.commandList->SetGraphicsRootSignature(context.rootSig.Get());
-  float mouse_pos[2] = {app_state.mouse_x * 2 - 1, (1-app_state.mouse_y) * 2 - 1};
-  context.commandList->SetGraphicsRoot32BitConstants(0, 2, &mouse_pos, 0);
+  d3dContext.commandList->SetGraphicsRootSignature(d3dContext.rootSig.Get());
+  float mouse_pos[2] = {g_appState.mouse_x * 2 - 1, (1-g_appState.mouse_y) * 2 - 1};
+  d3dContext.commandList->SetGraphicsRoot32BitConstants(0, 2, &mouse_pos, 0);
 
-  context.commandList->RSSetViewports(1, &context.viewport);
-  context.commandList->RSSetScissorRects(1, &context.scissorRect);
+  d3dContext.commandList->RSSetViewports(1, &d3dContext.viewport);
+  d3dContext.commandList->RSSetScissorRects(1, &d3dContext.scissorRect);
 
   // set to render target
   {
     D3D12_RESOURCE_BARRIER barrier = {};
     barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
     barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-    barrier.Transition.pResource = context.renderTargets[context.frameIndex].Get();
+    barrier.Transition.pResource = d3dContext.renderTargets[d3dContext.frameIndex].Get();
     barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
     barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
     barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 
-    context.commandList->ResourceBarrier(1, &barrier);
+    d3dContext.commandList->ResourceBarrier(1, &barrier);
   }
 
-  CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(context.descriptorHeap->GetCPUDescriptorHandleForHeapStart());
-  UINT rtvHandleSize = context.device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-  rtvHandle.Offset(context.frameIndex, rtvHandleSize);
+  CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(d3dContext.descriptorHeap->GetCPUDescriptorHandleForHeapStart());
+  UINT rtvHandleSize = d3dContext.device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+  rtvHandle.Offset(d3dContext.frameIndex, rtvHandleSize);
 
   static float color[4] = {0,1,1,1};
-  context.commandList->OMSetRenderTargets(1, &rtvHandle, false, NULL);
-  context.commandList->ClearRenderTargetView(rtvHandle, color, 0, NULL);
-  context.commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+  d3dContext.commandList->OMSetRenderTargets(1, &rtvHandle, false, NULL);
+  d3dContext.commandList->ClearRenderTargetView(rtvHandle, color, 0, NULL);
+  d3dContext.commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
   
-  context.commandList->IASetVertexBuffers(0, 1, &context.vertBufferView);
-  context.commandList->DrawInstanced(3, 1, 0, 0);
+  d3dContext.commandList->IASetVertexBuffers(0, 1, &d3dContext.vertBufferView);
+  d3dContext.commandList->DrawInstanced(3, 1, 0, 0);
 
   // setting to present
   {
     D3D12_RESOURCE_BARRIER barrier = {};
     barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
     barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-    barrier.Transition.pResource = context.renderTargets[context.frameIndex].Get();
+    barrier.Transition.pResource = d3dContext.renderTargets[d3dContext.frameIndex].Get();
     barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
     barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
     barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 
-    context.commandList->ResourceBarrier(1, &barrier);
+    d3dContext.commandList->ResourceBarrier(1, &barrier);
   }
 
-  context.commandList->Close();
+  d3dContext.commandList->Close();
 
-  ID3D12CommandList* commandListsToExec[] = { context.commandList.Get() };
-  context.commandQueue->ExecuteCommandLists(1, commandListsToExec);
-  context.swapChain3->Present(1,0);
+  ID3D12CommandList* commandListsToExec[] = { d3dContext.commandList.Get() };
+  d3dContext.commandQueue->ExecuteCommandLists(1, commandListsToExec);
+  d3dContext.swapChain3->Present(1,0);
 
-  sync(context);
+  sync(d3dContext);
 }
 
 void sync(D3DContext& context) {
@@ -391,4 +393,8 @@ void sync(D3DContext& context) {
   }
 
   context.frameIndex = context.swapChain3->GetCurrentBackBufferIndex();
+}
+
+void RenderFrame(RenderContext& renderContext) {
+  RenderD3D12Frame();
 }

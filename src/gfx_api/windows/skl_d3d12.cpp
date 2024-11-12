@@ -3,6 +3,8 @@
 #include "app_state.h"
 #include "defines.h"
 
+#define NUM_CONSTS 7
+
 D3DContext d3dContext;
 
 extern AppState g_appState;
@@ -126,7 +128,7 @@ void InitD3D12(HWND hwnd) {
   D3D12_ROOT_PARAMETER rootParameter = {};
   rootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
   rootParameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-  rootParameter.Constants.Num32BitValues = 2;
+  rootParameter.Constants.Num32BitValues = NUM_CONSTS;
   rootParameter.Constants.ShaderRegister = 0;
   rootParameter.Constants.RegisterSpace = 0;
 
@@ -327,7 +329,13 @@ void RenderD3D12Frame() {
 
   d3dContext.commandList->SetGraphicsRootSignature(d3dContext.rootSig.Get());
   float mouse_pos[2] = {g_appState.mouse_x * 2 - 1, (1-g_appState.mouse_y) * 2 - 1};
-  d3dContext.commandList->SetGraphicsRoot32BitConstants(0, 2, &mouse_pos, 0);
+  float color[3] = {1.0f, 0, 1.0f};
+  float constants[NUM_CONSTS] = {
+    mouse_pos[0], mouse_pos[1],
+    0,0,
+    color[0], color[1], color[2]
+  };
+  d3dContext.commandList->SetGraphicsRoot32BitConstants(0, NUM_CONSTS, constants, 0);
 
   d3dContext.commandList->RSSetViewports(1, &d3dContext.viewport);
   d3dContext.commandList->RSSetScissorRects(1, &d3dContext.scissorRect);
@@ -349,9 +357,9 @@ void RenderD3D12Frame() {
   UINT rtvHandleSize = d3dContext.device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
   rtvHandle.Offset(d3dContext.frameIndex, rtvHandleSize);
 
-  static float color[4] = {0,1,1,1};
+  static float clearColor[4] = {0,0,0,1};
   d3dContext.commandList->OMSetRenderTargets(1, &rtvHandle, false, NULL);
-  d3dContext.commandList->ClearRenderTargetView(rtvHandle, color, 0, NULL);
+  d3dContext.commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, NULL);
   d3dContext.commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
   
   d3dContext.commandList->IASetVertexBuffers(0, 1, &d3dContext.vertBufferView);

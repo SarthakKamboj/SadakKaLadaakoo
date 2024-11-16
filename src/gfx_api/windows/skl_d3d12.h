@@ -65,6 +65,12 @@ struct SKL_Vertex {
 };
 
 
+struct CBV_Data {
+  float r = 0;
+  float g = 0;
+  float b = 0;
+};
+
 struct D3DContext {
   int fenceValue = 0;
   HANDLE eventHandle;
@@ -76,10 +82,15 @@ struct D3DContext {
   ComPtr<ID3D12PipelineState> pipelineState;
   ComPtr<ID3D12RootSignature> rootSig;
   ComPtr<ID3D12Resource> renderTargets[2];
-  ComPtr<ID3D12DescriptorHeap> descriptorHeap;
+  ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap;
   ComPtr<ID3D12Device> device;
   D3D12_VERTEX_BUFFER_VIEW vertBufferView;
   ComPtr<ID3D12Resource> vertexBuffer;
+
+  // D3D12_CPU_DESCRIPTOR_HANDLE cbvCpuHandle;
+  // WARNING: need to create 2 of these in practice because we don't want to modify constant buffer data for renders that might be in flight
+  ComPtr<ID3D12DescriptorHeap> cbvDescriptorHeap;
+  ComPtr<ID3D12Resource> cbvResource;
 
   D3D12_VIEWPORT viewport;
   D3D12_RECT scissorRect;
@@ -89,6 +100,9 @@ struct D3DContext {
 
   bool valid_context = false;
 
+#if defined(_DEBUG)
+  ComPtr<ID3D12Debug> debugController;
+#endif
 };
 
 void InitD3D12(HWND hwnd);

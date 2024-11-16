@@ -6,9 +6,11 @@ struct PSInput
 
 cbuffer my_constants : register(b0)
 {
-    float2 mouse;
     float3 color; // starts new 4-component vector because of HLSL 4-component boundary packing rule
+    float2 mouse;
 };
+
+
 
 PSInput VSMain(float4 position : POSITION, float4 in_color : COLOR)
 {

@@ -16,6 +16,30 @@ void hresult_log(HRESULT result) {
     case DXGI_ERROR_INVALID_CALL:
       SKL_LOG("DXGI_ERROR_INVALID_CALL");
       break;
+    case D3D12_ERROR_DRIVER_VERSION_MISMATCH:
+      SKL_LOG("D3D12_ERROR_DRIVER_VERSION_MISMATCH");
+      break;
+    case DXGI_ERROR_WAS_STILL_DRAWING:
+      SKL_LOG("DXGI_ERROR_WAS_STILL_DRAWING");
+      break;
+    case E_FAIL:
+      SKL_LOG("E_FAIL");
+      break;
+    case E_INVALIDARG:
+      SKL_LOG("E_INVALIDARG");
+      break;
+    case E_OUTOFMEMORY:
+      SKL_LOG("E_OUTOFMEMORY");
+      break;
+    case E_NOTIMPL:
+      SKL_LOG("E_NOTIMPL");
+      break;
+    case S_FALSE:
+      SKL_LOG("S_FALSE");
+      break;
+    case S_OK:
+      SKL_LOG("S_OK");
+      break;
     default:
       SKL_LOG("unknown HRESULT");
   }
@@ -30,13 +54,24 @@ void InitD3D12(HWND hwnd) {
     return;
   }
 
+#if defined(_DEBUG)
   // enable debug layer
-  ComPtr<ID3D12Debug> debugController;
-  if (S_OK != D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))) {
-    SKL_LOG("could not create debug interface");
+  if (S_OK != D3D12GetDebugInterface(IID_PPV_ARGS(&d3dContext.debugController))) {
+    SKL_LOG("could not create d3d12 debug interface");
     return;
   }
-  debugController->EnableDebugLayer();
+  d3dContext.debugController->EnableDebugLayer();
+  SKL_LOG("enabled d3d12 debug layer");
+
+#if false
+  ComPtr<IDXGIDebug1> dxgiDebug;
+  if (S_OK != DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug))) {
+    SKL_LOG("could not create dxgi debug interface");
+    return;
+  }
+  dxgiDebug->EnableLeakTrackingForThread();
+#endif
+#endif
 
   // create the device, which is an instance of the D3d12 api
   ComPtr<IDXGIAdapter1> hardwareAdapter;
@@ -90,6 +125,8 @@ void InitD3D12(HWND hwnd) {
   }
   d3dContext.frameIndex = d3dContext.swapChain3->GetCurrentBackBufferIndex();
 
+  // RENDER TARGET DESCRIPTOR HEAP + DESCRIPTOR CREATION
+
   // descriptors/views describe Id3d resource objects (in this case a render target) 
   // a render target view is a type of descriptor for the render target
   D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
@@ -98,14 +135,14 @@ void InitD3D12(HWND hwnd) {
   heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
   heapDesc.NodeMask = 0;
 
-  if (S_OK != d3dContext.device->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&d3dContext.descriptorHeap))) {
+  if (S_OK != d3dContext.device->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&d3dContext.rtvDescriptorHeap))) {
     SKL_LOG("could not make render target view descriptor heap");
     return;
   }
 
   // for each of those render target view descriptors, convert the buffer from the swap chain backbuffer into a render target view and associate it with the render target view descriptor
   int rtvDescHandleSize = d3dContext.device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-  CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(d3dContext.descriptorHeap->GetCPUDescriptorHandleForHeapStart());
+  CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(d3dContext.rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
   for (int i = 0; i < heapDesc.NumDescriptors; i++) {
     if (S_OK != d3dContext.swapChain3->GetBuffer(i, IID_PPV_ARGS(&d3dContext.renderTargets[i]))) {
       SKL_LOG("could not get back buffer index %i from swapchain", i);
@@ -117,6 +154,85 @@ void InitD3D12(HWND hwnd) {
     rtvHandle.Offset(1, rtvDescHandleSize);
   }
 
+  // CONSTANT BUFFER VIEW/DESCRIPTOR CREATION
+
+  D3D12_DESCRIPTOR_HEAP_DESC cbvDescHeap = {};
+  cbvDescHeap.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+  cbvDescHeap.NumDescriptors = 1;
+  cbvDescHeap.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+
+  if (S_OK != d3dContext.device->CreateDescriptorHeap(&cbvDescHeap, IID_PPV_ARGS(&d3dContext.cbvDescriptorHeap))) {
+    SKL_LOG("could not create descriptor heap for cbv");
+    return;
+  }
+
+  D3D12_DESCRIPTOR_HEAP_DESC desc = d3dContext.cbvDescriptorHeap->GetDesc();
+  SKL_LOG("desc info: type: %i, num desc: %i, flags: %i, node mask: %i", desc.Type, desc.NumDescriptors, desc.Flags, desc.NodeMask);
+
+
+#if false
+  D3D12_HEAP_PROPERTIES cbvHeapProps{};
+  cbvHeapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
+  cbvHeapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+  cbvHeapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+  cbvHeapProps.CreationNodeMask = 0;
+  cbvHeapProps.VisibleNodeMask = 0;
+
+  D3D12_RESOURCE_DESC cbvResourceDesc{};
+  cbvResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+  cbvResourceDesc.Alignment = 0;
+  cbvResourceDesc.Width = sizeof(CBV_Data);
+  cbvResourceDesc.Height = 1;
+  cbvResourceDesc.DepthOrArraySize = 1;
+  cbvResourceDesc.MipLevels = 1;
+  cbvResourceDesc.Format = DXGI_FORMAT_UNKNOWN;
+  cbvResourceDesc.SampleDesc.Count = 1;
+  cbvResourceDesc.SampleDesc.Quality = 0;
+  cbvResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+  cbvResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+  if (S_OK != d3dContext.device->CreateCommittedResource(&cbvHeapProps, D3D12_HEAP_FLAG_NONE, &cbvResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL, IID_PPV_ARGS(&d3dContext.cbvResource))) {
+#else
+  if (S_OK != d3dContext.device->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD), 
+                                                          D3D12_HEAP_FLAG_NONE, 
+                                                          &CD3DX12_RESOURCE_DESC::Buffer(sizeof(CBV_Data)),
+                                                          D3D12_RESOURCE_STATE_GENERIC_READ,
+                                                          NULL,
+                                                          IID_PPV_ARGS(&d3dContext.cbvResource))) {
+#endif
+    SKL_LOG("could not create committed resource for cbv");
+    return;
+  }
+
+  D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
+  cbvDesc.BufferLocation = d3dContext.cbvResource->GetGPUVirtualAddress();
+  // cbvDesc.SizeInBytes = sizeof(CBV_Data);
+  cbvDesc.SizeInBytes = (sizeof(CBV_Data) + 255) & ~255; // must be 256 byte aligned
+
+  CD3DX12_CPU_DESCRIPTOR_HANDLE cbvCpuHandle(d3dContext.cbvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+
+  SKL_LOG("buffer gpu BufferLoc: %llu, buffer size in bytes: %i, address of 1st descriptor in cbv descriptor heap: %zu", cbvDesc.BufferLocation, cbvDesc.SizeInBytes, cbvCpuHandle.ptr);
+
+  d3dContext.device->CreateConstantBufferView(&cbvDesc, d3dContext.cbvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+
+  CBV_Data data{};
+  data.r = 0.0f;
+  data.g = 0.0f;
+  data.b = 1.0f;
+
+  void* cbvDataPtr = NULL;
+  D3D12_RANGE cbvReadRange = {0,0};
+  HRESULT res = d3dContext.cbvResource->Map(0, &cbvReadRange, &cbvDataPtr);
+  if (S_OK != res) {
+    hresult_log(res);
+    SKL_LOG("could not populate cbv resource with data");
+    return;
+  }
+  memcpy(cbvDataPtr, &data, sizeof(CBV_Data));
+  SKL_LOG("cbvDataPtr is %p");
+  // d3dContext.cbvResource->Unmap(0, &cbvReadRange);
+ 
+
   // create the command allocator for this device that will allocate the command lists that will contain the actual commands
   if (S_OK != d3dContext.device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&d3dContext.commandAllocator))) {
     SKL_LOG("could not create command allocator");
@@ -125,15 +241,25 @@ void InitD3D12(HWND hwnd) {
 
   D3D12_ROOT_SIGNATURE_DESC rootSigDesc{};
 
-  D3D12_ROOT_PARAMETER rootParameter = {};
-  rootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-  rootParameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-  rootParameter.Constants.Num32BitValues = NUM_CONSTS;
-  rootParameter.Constants.ShaderRegister = 0;
-  rootParameter.Constants.RegisterSpace = 0;
+  D3D12_ROOT_PARAMETER rootParameters[1]{};
 
-  rootSigDesc.NumParameters = 1;
-  rootSigDesc.pParameters = &rootParameter;
+  // root constants
+  rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+  rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+  rootParameters[0].Constants.Num32BitValues = NUM_CONSTS;
+  rootParameters[0].Constants.ShaderRegister = 0;
+  rootParameters[0].Constants.RegisterSpace = 0;
+
+#if false
+  // root constant description
+  rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+  rootParamaters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+  rootParameters[1].Descriptor.ShaderRegister = 1;
+  rootParameters[1].Descriptor.RegisterSpace = 0;
+#endif
+
+  rootSigDesc.NumParameters = sizeof(rootParameters) / sizeof(D3D12_ROOT_PARAMETER);
+  rootSigDesc.pParameters = rootParameters;
   rootSigDesc.NumStaticSamplers = 0;
   rootSigDesc.pStaticSamplers = NULL;
   rootSigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
@@ -258,7 +384,7 @@ void InitD3D12(HWND hwnd) {
   vertBuffResourceDesc.MipLevels = 1;
   vertBuffResourceDesc.Format = DXGI_FORMAT_UNKNOWN;
   vertBuffResourceDesc.SampleDesc.Count = 1;
-  vertBuffResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR ;
+  vertBuffResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
   vertBuffResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
   if (S_OK != d3dContext.device->CreateCommittedResource(&vertexBuffHeapProps, D3D12_HEAP_FLAG_NONE, &vertBuffResourceDesc, 
@@ -308,7 +434,6 @@ void InitD3D12(HWND hwnd) {
   d3dContext.valid_context = true;
 
   SKL_LOG("successfully initialized D3d12");
-
 }
 
 void RenderD3D12Frame() {
@@ -328,14 +453,19 @@ void RenderD3D12Frame() {
   }
 
   d3dContext.commandList->SetGraphicsRootSignature(d3dContext.rootSig.Get());
+
   float mouse_pos[2] = {g_appState.mouse_x * 2 - 1, (1-g_appState.mouse_y) * 2 - 1};
   float color[3] = {1.0f, 0, 1.0f};
   float constants[NUM_CONSTS] = {
+    color[0], color[1], color[2], 0,
     mouse_pos[0], mouse_pos[1],
-    0,0,
-    color[0], color[1], color[2]
   };
   d3dContext.commandList->SetGraphicsRoot32BitConstants(0, NUM_CONSTS, constants, 0);
+
+#if false
+  D3D12_GPU_VIRTUAL_ADDRESS cbvGpuAddress;
+  d3dContext.commandList->SetGraphicsRootConstantBufferView(1, cbvGpuAddress);
+#endif
 
   d3dContext.commandList->RSSetViewports(1, &d3dContext.viewport);
   d3dContext.commandList->RSSetScissorRects(1, &d3dContext.scissorRect);
@@ -353,7 +483,7 @@ void RenderD3D12Frame() {
     d3dContext.commandList->ResourceBarrier(1, &barrier);
   }
 
-  CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(d3dContext.descriptorHeap->GetCPUDescriptorHandleForHeapStart());
+  CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(d3dContext.rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
   UINT rtvHandleSize = d3dContext.device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
   rtvHandle.Offset(d3dContext.frameIndex, rtvHandleSize);
 

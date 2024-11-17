@@ -13,33 +13,33 @@
 #include "defines.h"
 #include "app_state.h"
 
-AppState g_appState;
+app_state_t g_app_state;
 
 #ifdef SKL_WINDOWS
-int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE disregard, PWSTR pCmdLineArgs, int nShowState) {
+int WINAPI wWinMain(HINSTANCE h_instance, HINSTANCE disregard, PWSTR p_cmd_line_args, int n_show_state) {
 #endif
 
-  WindowInfo windowInfo{};
-  windowInfo.width = 800;
-  windowInfo.height = 450;
+  window_info_t window_info{};
+  window_info.width = 800;
+  window_info.height = 450;
   const char* name = "SadakKaLadaakoo";
-  memcpy(windowInfo.name, name, strlen(name)+1);
+  memcpy(window_info.name, name, strlen(name)+1);
 
 #ifdef SKL_WINDOWS
-  Win32InitContext win32InitContext{};
-  win32InitContext.hInstance = hInstance;
-  win32InitContext.pCmdLineArgs = pCmdLineArgs;
-  win32InitContext.nShowState = nShowState;
+  win32_init_ctx_t win32_init_ctx{};
+  win32_init_ctx.h_instance = h_instance;
+  win32_init_ctx.p_cmd_line_args = p_cmd_line_args;
+  win32_init_ctx.n_show_state = n_show_state;
 
-  InitPlatformSpecific(windowInfo, win32InitContext);
+  init_platform_specific(window_info, win32_init_ctx);
 #endif
 
-  RenderContext renderContext;
+  render_ctx_t render_ctx;
 
-  g_appState.running = true;
-  while (g_appState.running) {
-    PollEvents();
-    RenderFrame(renderContext);
+  g_app_state.running = true;
+  while (g_app_state.running) {
+    poll_events();
+    render_frame(render_ctx);
   }
 
   return 0;

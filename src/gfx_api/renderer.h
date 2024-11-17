@@ -1,7 +1,7 @@
 #pragma once
 
-struct RenderContext {
+struct render_ctx_t {
 
 };
 
-void RenderFrame(RenderContext& renderContext);
+void render_frame(render_ctx_t& render_context);

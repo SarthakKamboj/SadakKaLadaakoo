@@ -1,14 +1,14 @@
 #include "skl_win32.h"
 
-static Win32Context i_win32Context;
+static win32_ctx_t i_win32Context;
 
-extern AppState g_appState;
+extern app_state_t g_app_state;
 
-void ConvertCharToWChar(const char* input, __SKL_OUT__ wchar_t* output) {
+void convert_char_to_wchar(const char* input, __SKL_OUT__ wchar_t* output) {
   mbstowcs(output, input, strlen(input)+1);
 }
 
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK window_procedure(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)
     {
@@ -33,8 +33,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         int y_pos = GET_Y_LPARAM(lParam);
         RECT clientRect = {};
         GetClientRect(hwnd, &clientRect);
-        g_appState.mouse_x = ((float)x_pos) / clientRect.right;
-        g_appState.mouse_y = ((float)y_pos) / clientRect.bottom;
+        g_app_state.mouse_x = ((float)x_pos) / clientRect.right;
+        g_app_state.mouse_y = ((float)y_pos) / clientRect.bottom;
       }
 
 
@@ -51,20 +51,20 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
-void InitPlatformSpecific(WindowInfo& windowInfo, Win32InitContext& win32InitContext) {
+void init_platform_specific(window_info_t& window_info, win32_init_ctx_t& win32InitContext) {
 
   WNDCLASS wc = {};
   wc.style = CS_HREDRAW | CS_VREDRAW;
-  wc.hInstance = win32InitContext.hInstance;
+  wc.hInstance = win32InitContext.h_instance;
   wchar_t wWindowInfoName[256]{};
-  ConvertCharToWChar(windowInfo.name, wWindowInfoName);
+  convert_char_to_wchar(window_info.name, wWindowInfoName);
   wc.lpszClassName = wWindowInfoName;
-  wc.lpfnWndProc = WindowProc;
+  wc.lpfnWndProc = window_procedure;
 
   char windowName[256]{};
-  sprintf(windowName, "%s Game", windowInfo.name);
+  sprintf(windowName, "%s Game", window_info.name);
   wchar_t wWindowName[256]{};
-  ConvertCharToWChar(windowName, wWindowName);
+  convert_char_to_wchar(windowName, wWindowName);
 
   RegisterClass(&wc);
 
@@ -73,10 +73,10 @@ void InitPlatformSpecific(WindowInfo& windowInfo, Win32InitContext& win32InitCon
     wWindowInfoName,
     wWindowName,
     WS_OVERLAPPEDWINDOW,
-    CW_USEDEFAULT, CW_USEDEFAULT, windowInfo.width, windowInfo.height,
+    CW_USEDEFAULT, CW_USEDEFAULT, window_info.width, window_info.height,
     NULL,
     NULL,
-    win32InitContext.hInstance,
+    win32InitContext.h_instance,
     NULL
   );
 
@@ -98,19 +98,19 @@ void InitPlatformSpecific(WindowInfo& windowInfo, Win32InitContext& win32InitCon
     SKL_LOG("created window successfully");
   }
 
-  InitD3D12(hwd);
+  init_d3d12(hwd);
 
-  ShowWindow(hwd, win32InitContext.nShowState);
+  ShowWindow(hwd, win32InitContext.n_show_state);
 
   i_win32Context.hwd = hwd;
 }
 
-void PollEvents() {
+void poll_events() {
   MSG msg{};
   while (PeekMessage(&msg, i_win32Context.hwd, 0, 0, PM_NOREMOVE)) {
     bool quitMsg = GetMessage(&msg, NULL, 0, 0) == 0;
     if (quitMsg) {
-      g_appState.running = false;
+      g_app_state.running = false;
       break;
     }
     TranslateMessage(&msg);

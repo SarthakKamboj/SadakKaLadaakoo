@@ -15,17 +15,17 @@
 #include "app_state.h"
 #include "../windowing.h"
 
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK window_procedure(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-struct Win32InitContext {
-  HINSTANCE hInstance;
-  PWSTR pCmdLineArgs;
-  int nShowState;
+struct win32_init_ctx_t {
+  HINSTANCE h_instance;
+  PWSTR p_cmd_line_args;
+  int n_show_state;
 };
 
-struct Win32Context {
+struct win32_ctx_t {
   HWND hwd;
 };
 
-void ConvertCharToWChar(const char* input, int inputLen, __SKL_OUT__ wchar_t* output);
-void InitPlatformSpecific(WindowInfo& windowInfo, Win32InitContext& context);
+void convert_char_to_wchar(const char* input, int inputLen, __SKL_OUT__ wchar_t* output);
+void init_platform_specific(window_info_t& window_info, win32_init_ctx_t& context);

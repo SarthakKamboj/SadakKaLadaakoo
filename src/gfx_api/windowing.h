@@ -2,10 +2,10 @@
 
 #include "../app_state.h"
 
-struct WindowInfo {
+struct window_info_t {
   int width = 0;
   int height = 0;
   char name[256]{};
 };
 
-void PollEvents();
+void poll_events();

@@ -16,15 +16,15 @@
 
 using namespace Microsoft::WRL;
 
-struct SKL_Position {
+struct skl_pos_t {
   float x = 0;
   float y = 0;
   float z = 0;
 
 #if false
-  SKL_Position() = default;
+  skl_pos_t() = default;
 
-  SKL_Position(float _x, float _y, float _z) {
+  skl_pos_t(float _x, float _y, float _z) {
     x = _x;
     y = _y;
     z = _z;
@@ -32,16 +32,16 @@ struct SKL_Position {
 #endif
 };
 
-struct SKL_Color {
+struct skl_color_t {
   float r = 0;
   float g = 0;
   float b = 0;
   float a = 1.0f;
 
 #if false
-  SKL_Color() = default;
+  skl_color_t() = default;
 
-  SKL_Color(float _r, float _g, float _b, float _a) {
+  skl_color_t(float _r, float _g, float _b, float _a) {
     r = _r;
     g = _g;
     b = _b;
@@ -50,14 +50,14 @@ struct SKL_Color {
 #endif
 };
 
-struct SKL_Vertex {
-  SKL_Position pos;
-  SKL_Color color;
+struct skl_vert_t {
+  skl_pos_t pos;
+  skl_color_t color;
 
 #if false
-  SKL_Vertex() = default;
+  skl_vert_t() = default;
 
-  SKL_Vertex(SKL_Position _pos, SKL_Color _col) {
+  skl_vert_t(skl_pos_t _pos, skl_color_t _col) {
     pos = _pos;
     color = _col;
   }
@@ -65,46 +65,46 @@ struct SKL_Vertex {
 };
 
 
-struct CBV_Data {
+struct cbv_data_t {
   float r = 0;
   float g = 0;
   float b = 0;
 };
 
-struct D3DContext {
-  int fenceValue = 0;
-  HANDLE eventHandle;
+struct d3d_ctx_t {
+  int fence_val = 0;
+  HANDLE evt_handle;
   ComPtr<ID3D12Fence> fence;
 
-  ComPtr<ID3D12CommandQueue> commandQueue;
-  ComPtr<ID3D12GraphicsCommandList> commandList;
-  ComPtr<ID3D12CommandAllocator> commandAllocator;
-  ComPtr<ID3D12PipelineState> pipelineState;
-  ComPtr<ID3D12RootSignature> rootSig;
-  ComPtr<ID3D12Resource> renderTargets[2];
-  ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap;
+  ComPtr<ID3D12CommandQueue> cmd_queue;
+  ComPtr<ID3D12GraphicsCommandList> cmd_list;
+  ComPtr<ID3D12CommandAllocator> cmd_alloc;
+  ComPtr<ID3D12PipelineState> pipeline_state;
+  ComPtr<ID3D12RootSignature> root_sig;
+  ComPtr<ID3D12Resource> render_targets[2];
+  ComPtr<ID3D12DescriptorHeap> rtv_desc_heap;
   ComPtr<ID3D12Device> device;
-  D3D12_VERTEX_BUFFER_VIEW vertBufferView;
-  ComPtr<ID3D12Resource> vertexBuffer;
+  D3D12_VERTEX_BUFFER_VIEW vert_buffer_view;
+  ComPtr<ID3D12Resource> vert_buffer;
 
   // D3D12_CPU_DESCRIPTOR_HANDLE cbvCpuHandle;
   // WARNING: need to create 2 of these in practice because we don't want to modify constant buffer data for renders that might be in flight
-  ComPtr<ID3D12DescriptorHeap> cbvDescriptorHeap;
-  ComPtr<ID3D12Resource> cbvResource;
+  ComPtr<ID3D12DescriptorHeap> cbv_desc_heap;
+  ComPtr<ID3D12Resource> cbv_resource;
 
   D3D12_VIEWPORT viewport;
-  D3D12_RECT scissorRect;
+  D3D12_RECT scissor_rect;
 
-  unsigned int frameIndex = 0;
-  ComPtr<IDXGISwapChain3> swapChain3;
+  unsigned int frame_idx = 0;
+  ComPtr<IDXGISwapChain3> swap_chain3;
 
   bool valid_context = false;
 
 #if defined(_DEBUG)
-  ComPtr<ID3D12Debug> debugController;
+  ComPtr<ID3D12Debug> debug_controller;
 #endif
 };
 
-void InitD3D12(HWND hwnd);
-void RenderD3D12Frame();
-void sync(D3DContext& context);
+void init_d3d12(HWND hwnd);
+void render_d3d12_frame();
+void sync(d3d_ctx_t& context);

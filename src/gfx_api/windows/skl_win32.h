@@ -28,4 +28,4 @@ struct win32_ctx_t {
 };
 
 void convert_char_to_wchar(const char* input, int inputLen, __SKL_OUT__ wchar_t* output);
-void init_platform_specific(window_info_t& window_info, win32_init_ctx_t& context);
+void init_platform_specific(const window_info_t& window_info, const win32_init_ctx_t& context);

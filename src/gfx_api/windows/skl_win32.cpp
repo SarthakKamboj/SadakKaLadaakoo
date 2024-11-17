@@ -51,11 +51,11 @@ LRESULT CALLBACK window_procedure(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
-void init_platform_specific(window_info_t& window_info, win32_init_ctx_t& win32InitContext) {
+void init_platform_specific(const window_info_t& window_info, const win32_init_ctx_t& win32_init_ctx) {
 
   WNDCLASS wc = {};
   wc.style = CS_HREDRAW | CS_VREDRAW;
-  wc.hInstance = win32InitContext.h_instance;
+  wc.hInstance = win32_init_ctx.h_instance;
   wchar_t wWindowInfoName[256]{};
   convert_char_to_wchar(window_info.name, wWindowInfoName);
   wc.lpszClassName = wWindowInfoName;
@@ -76,7 +76,7 @@ void init_platform_specific(window_info_t& window_info, win32_init_ctx_t& win32I
     CW_USEDEFAULT, CW_USEDEFAULT, window_info.width, window_info.height,
     NULL,
     NULL,
-    win32InitContext.h_instance,
+    win32_init_ctx.h_instance,
     NULL
   );
 
@@ -100,7 +100,7 @@ void init_platform_specific(window_info_t& window_info, win32_init_ctx_t& win32I
 
   init_d3d12(hwd);
 
-  ShowWindow(hwd, win32InitContext.n_show_state);
+  ShowWindow(hwd, win32_init_ctx.n_show_state);
 
   i_win32Context.hwd = hwd;
 }

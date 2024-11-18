@@ -1,11 +1,10 @@
 #include "skl_d3d12.h"
 
 #include "app_state.h"
-#include "defines.h"
 
 #define NUM_CONSTS 7
 
-d3d_ctx_t d3d_ctx;
+static d3d_ctx_t d3d_ctx;
 
 extern app_state_t g_app_state;
 

@@ -12,6 +12,7 @@
 #include "gfx_api/windowing.h"
 #include "defines.h"
 #include "app_state.h"
+#include "media/video/mp4.h"
 
 app_state_t g_app_state;
 
@@ -33,6 +34,12 @@ int WINAPI wWinMain(HINSTANCE h_instance, HINSTANCE disregard, PWSTR p_cmd_line_
 
   init_platform_specific(window_info, win32_init_ctx);
 #endif
+
+  bool res = load_mp4("C:\\Sarthak\\projects\\SadakKaLadaakoo\\sample.mp4");
+  if (!res) {
+    SKL_LOG("parsing sample.mp4 failed");
+  }
+  SKL_LOG("parsing sample.mp4 succeeded");
 
   render_ctx_t render_ctx;
 

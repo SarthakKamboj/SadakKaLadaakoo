@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 
-#include "gfx_api/windows/skl_win32.h"
+#include "platform/win32/skl_win32.h"
 #include "defines.h"
 #include "platform/app.h"
 

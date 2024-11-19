@@ -85,8 +85,8 @@ void init_platform_specific(const window_info_t& window_info, const win32_init_c
 
   bool success = AllocConsole();
   AttachConsole(GetCurrentProcessId());
-  // reroutes stdout FILE* stream to console "file"
 
+  // reroutes stdout FILE* stream to console "file"
   freopen("CON", "w", stdout);
   
   if (!success) {

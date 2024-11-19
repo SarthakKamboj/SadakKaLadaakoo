@@ -35,8 +35,6 @@ int WINAPI wWinMain(HINSTANCE h_instance, HINSTANCE disregard, PWSTR p_cmd_line_
 
   init(win32_init_ctx);
 
-  render_ctx_t render_ctx;
-
   g_app_state.running = true;
   while (g_app_state.running) {
     poll_events();

@@ -11,8 +11,6 @@
 #include <wrl.h>
 
 #include "defines.h"
-#include "../renderer.h"
-#include "../windowing.h"
 
 using namespace Microsoft::WRL;
 

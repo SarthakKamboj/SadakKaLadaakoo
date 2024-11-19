@@ -13,8 +13,6 @@
 
 int WINAPI wWinMain(HINSTANCE h_instance, HINSTANCE disregard, PWSTR p_cmd_line_args, int n_show_state) { 
 
-  while(true) {}
-
   win32_init_ctx_t win32_init_ctx{};
   win32_init_ctx.h_instance = h_instance;
   win32_init_ctx.p_cmd_line_args = p_cmd_line_args;

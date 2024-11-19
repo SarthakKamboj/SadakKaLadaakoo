@@ -31,7 +31,6 @@ void update() {
 void run() {
     g_app_state.running = true;
     while (g_app_state.running) {
-        SKL_LOG("running");
         poll_events();
         update();
         render_frame();

@@ -10,7 +10,7 @@ REM cl /EHsc /W4 src\main.cpp src\gfx_api\windows\skl_d3d12.cpp src\gfx_api\wind
 
 cl /EHsc /W4  ^
     src\main.cpp src\platform\app.cpp  ^
-    src\gfx_api\windows\skl_d3d12.cpp src\gfx_api\windows\skl_win32.cpp   ^
+    src\platform\win32\skl_d3d12.cpp src\platform\win32\skl_win32.cpp   ^
     /Fe:smain.exe  ^
     /I external/DirectX-Headers/include/directx  ^
     /I src  ^

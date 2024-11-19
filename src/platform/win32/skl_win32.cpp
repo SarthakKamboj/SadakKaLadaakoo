@@ -6,9 +6,9 @@ static win32_ctx_t i_win32Context;
 
 extern app_state_t g_app_state;
 
-void convert_char_to_wchar(const char* input, __SKL_OUT__ wchar_t* output) {
+void convert_char_to_wchar(const char* input, __SKL_OUT__ wchar_t* output, int wchar_buffer_len) {
   size_t num_char_converted;
-  mbstowcs_s(&num_char_converted, output, strlen(input), input, strlen(input));
+  mbstowcs_s(&num_char_converted, output, wchar_buffer_len, input, strlen(input));
 }
 
 LRESULT CALLBACK window_procedure(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -60,14 +60,14 @@ void init_platform_specific(const window_info_t& window_info, const win32_init_c
   wc.style = CS_HREDRAW | CS_VREDRAW;
   wc.hInstance = win32_init_ctx.h_instance;
   wchar_t wWindowInfoName[256]{};
-  convert_char_to_wchar(window_info.name, wWindowInfoName);
+  convert_char_to_wchar(window_info.name, wWindowInfoName, 256);
   wc.lpszClassName = wWindowInfoName;
   wc.lpfnWndProc = window_procedure;
 
   char windowName[256]{};
   sprintf_s(windowName, 256, "%s Game", window_info.name);
   wchar_t wWindowName[256]{};
-  convert_char_to_wchar(windowName, wWindowName);
+  convert_char_to_wchar(windowName, wWindowName, 256);
 
   RegisterClass(&wc);
 

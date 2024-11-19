@@ -5,23 +5,14 @@
 
 app_state_t g_app_state;
 
-void init(
-#ifdef SKL_WINDOWS
-    const win32_init_ctx_t& init_ctx
-#endif
-) {
+void init(const platform_init_ctx_t& init_ctx) {
     window_info_t window_info{};
     window_info.width = 800;
     window_info.height = 450;
     const char* name = "SadakKaLadaakoo";
     memcpy(window_info.name, name, strlen(name)+1);
 
-    init_platform_specific(
-        window_info
-#ifdef SKL_WINDOWS
-        , init_ctx
-#endif
-    );
+    init_platform_specific(window_info, init_ctx);
 }
 
 void update() {

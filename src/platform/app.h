@@ -14,8 +14,10 @@ struct app_state_t {
 
 #ifdef SKL_WINDOWS
 struct win32_init_ctx_t;
-void init(const win32_init_ctx_t& init_ctx);
+typedef win32_init_ctx_t platform_init_ctx_t;
 #endif
+
+void init(const platform_init_ctx_t& init_ctx);
 
 void run();
 

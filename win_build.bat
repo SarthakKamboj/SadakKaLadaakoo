@@ -1,10 +1,7 @@
 REM https://learn.microsoft.com/en-us/answers/questions/1341012/how-to-compile-a-code-for-windows-gui-application
 REM https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-creation
-del **.obj
-del **.exe
-del **.pdb
-del **.ilk
-del **.idb
+
+./clean.bat &
 
 cl /EHsc /W4  ^
     src\win32_main.cpp src\platform\app.cpp  ^

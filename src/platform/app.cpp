@@ -1,7 +1,13 @@
 #include "app.h"
 
+#ifdef SKL_WINDOWS
 #include "win32/skl_win32.h"
-#include "platform/app.h"
+#endif
+
+#include "macos/skl_macos.h"
+
+#include "app.h"
+#include <string>
 
 app_state_t g_app_state;
 

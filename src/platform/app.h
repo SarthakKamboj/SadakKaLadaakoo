@@ -12,9 +12,12 @@ struct app_state_t {
   bool running = false;
 };
 
-#ifdef SKL_WINDOWS
+#if defined(SKL_WINDOWS)
 struct win32_init_ctx_t;
 typedef win32_init_ctx_t platform_init_ctx_t;
+#elif defined(SKL_MAC)
+struct mac_init_ctx_t;
+typedef mac_init_ctx_t platform_init_ctx_t;
 #endif
 
 void init(const platform_init_ctx_t& init_ctx);

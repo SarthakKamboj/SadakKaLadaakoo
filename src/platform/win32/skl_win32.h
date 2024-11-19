@@ -12,7 +12,7 @@
 
 #include "skl_d3d12.h"
 #include "defines.h"
-#include "platform/app.h"
+#include "../app.h"
 
 LRESULT CALLBACK window_procedure(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -27,4 +27,5 @@ struct win32_ctx_t {
 };
 
 void convert_char_to_wchar(const char* input, int inputLen, __SKL_OUT__ wchar_t* output);
+
 void init_platform_specific(const window_info_t& window_info, const win32_init_ctx_t& context);

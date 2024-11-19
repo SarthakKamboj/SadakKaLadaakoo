@@ -8,5 +8,3 @@
 
 #define skl_assert_msg(msg) assert(false, msg)
 #define skl_assert(exp, msg) assert(exp, msg)
-
-#define min(a,b) ( a < b ? a : b )

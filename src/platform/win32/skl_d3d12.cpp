@@ -521,7 +521,6 @@ void sync(d3d_ctx_t& context) {
   context.frame_idx = context.swap_chain3->GetCurrentBackBufferIndex();
 }
 
-// void render_frame(const render_ctx_t& render_ctx) {
 void render_frame() {
   render_d3d12_frame();
 }

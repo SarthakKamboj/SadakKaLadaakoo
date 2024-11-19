@@ -7,7 +7,8 @@ static win32_ctx_t i_win32Context;
 extern app_state_t g_app_state;
 
 void convert_char_to_wchar(const char* input, __SKL_OUT__ wchar_t* output) {
-  mbstowcs(output, input, strlen(input)+1);
+  size_t num_char_converted;
+  mbstowcs_s(&num_char_converted, output, strlen(input), input, strlen(input));
 }
 
 LRESULT CALLBACK window_procedure(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -64,7 +65,7 @@ void init_platform_specific(const window_info_t& window_info, const win32_init_c
   wc.lpfnWndProc = window_procedure;
 
   char windowName[256]{};
-  sprintf(windowName, "%s Game", window_info.name);
+  sprintf_s(windowName, 256, "%s Game", window_info.name);
   wchar_t wWindowName[256]{};
   convert_char_to_wchar(windowName, wWindowName);
 

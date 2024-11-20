@@ -12,6 +12,8 @@
 		6F0084402CEC7C62007B86FA /* skl_macos.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6F00843F2CEC7C5F007B86FA /* skl_macos.mm */; };
 		6F0084432CEC7C82007B86FA /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F0084422CEC7C82007B86FA /* Metal.framework */; };
 		6F0084452CEC7C88007B86FA /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F0084442CEC7C88007B86FA /* MetalKit.framework */; };
+		6F0084472CEDB072007B86FA /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F0084462CEDB072007B86FA /* AppKit.framework */; };
+		6F00844A2CEDC932007B86FA /* shader.metal in Sources */ = {isa = PBXBuildFile; fileRef = 6F0084492CEDC932007B86FA /* shader.metal */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -30,12 +32,14 @@
 		6F0084042CEC75F7007B86FA /* SadakKaLadaakoo-Mac */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "SadakKaLadaakoo-Mac"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F0084112CEC7748007B86FA /* mac_main.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = mac_main.mm; sourceTree = "<group>"; };
 		6F0084322CEC7B43007B86FA /* app.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = app.h; sourceTree = "<group>"; };
-		6F0084332CEC7B43007B86FA /* app.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = app.cpp; sourceTree = "<group>"; };
+		6F0084332CEC7B43007B86FA /* app.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; path = app.cpp; sourceTree = "<group>"; };
 		6F00843D2CEC7B80007B86FA /* defines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = defines.h; sourceTree = "<group>"; };
 		6F00843E2CEC7BE4007B86FA /* skl_macos.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = skl_macos.h; sourceTree = "<group>"; };
 		6F00843F2CEC7C5F007B86FA /* skl_macos.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = skl_macos.mm; sourceTree = "<group>"; };
 		6F0084422CEC7C82007B86FA /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
 		6F0084442CEC7C88007B86FA /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
+		6F0084462CEDB072007B86FA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		6F0084492CEDC932007B86FA /* shader.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = shader.metal; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -43,6 +47,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6F0084472CEDB072007B86FA /* AppKit.framework in Frameworks */,
 				6F0084432CEC7C82007B86FA /* Metal.framework in Frameworks */,
 				6F0084452CEC7C88007B86FA /* MetalKit.framework in Frameworks */,
 			);
@@ -93,6 +98,7 @@
 		6F0084392CEC7B6C007B86FA /* macos */ = {
 			isa = PBXGroup;
 			children = (
+				6F0084492CEDC932007B86FA /* shader.metal */,
 			);
 			path = macos;
 			sourceTree = "<group>";
@@ -108,6 +114,7 @@
 		6F0084412CEC7C82007B86FA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				6F0084462CEDB072007B86FA /* AppKit.framework */,
 				6F0084442CEC7C88007B86FA /* MetalKit.framework */,
 				6F0084422CEC7C82007B86FA /* Metal.framework */,
 			);
@@ -174,6 +181,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6F00844A2CEDC932007B86FA /* shader.metal in Sources */,
 				6F0084362CEC7B43007B86FA /* app.cpp in Sources */,
 				6F0084122CEC7761007B86FA /* mac_main.mm in Sources */,
 				6F0084402CEC7C62007B86FA /* skl_macos.mm in Sources */,

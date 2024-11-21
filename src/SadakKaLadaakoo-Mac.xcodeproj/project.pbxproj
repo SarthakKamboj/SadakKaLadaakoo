@@ -40,6 +40,7 @@
 		6F0084442CEC7C88007B86FA /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		6F0084462CEDB072007B86FA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		6F0084492CEDC932007B86FA /* shader.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = shader.metal; sourceTree = "<group>"; };
+		6F00844B2CEF34F5007B86FA /* geometry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = geometry.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,6 +60,7 @@
 		6F0083FB2CEC75F7007B86FA = {
 			isa = PBXGroup;
 			children = (
+				6F00844B2CEF34F5007B86FA /* geometry.h */,
 				6F0084112CEC7748007B86FA /* mac_main.mm */,
 				6F00843D2CEC7B80007B86FA /* defines.h */,
 				6F00843C2CEC7B6C007B86FA /* shaders */,

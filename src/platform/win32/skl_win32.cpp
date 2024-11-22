@@ -36,8 +36,8 @@ LRESULT CALLBACK window_procedure(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
         int y_pos = GET_Y_LPARAM(lParam);
         RECT clientRect = {};
         GetClientRect(hwnd, &clientRect);
-        g_app_state.mouse_x = ((float)x_pos) / clientRect.right;
-        g_app_state.mouse_y = ((float)y_pos) / clientRect.bottom;
+        g_app_state.input.mouse_x = ((float)x_pos) / clientRect.right;
+        g_app_state.input.mouse_y = ((float)y_pos) / clientRect.bottom;
       }
 
 
@@ -45,7 +45,8 @@ LRESULT CALLBACK window_procedure(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
       {
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hwnd, &ps);
-        FillRect(hdc, &ps.rcPaint, (HBRUSH) (COLOR_WINDOW+1));
+        update();
+        render_frame();
         EndPaint(hwnd, &ps);
       }
       return 0;
@@ -54,7 +55,7 @@ LRESULT CALLBACK window_procedure(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
-void init_platform_specific(const window_info_t& window_info, const win32_init_ctx_t& win32_init_ctx) {
+void app_run_platform_specific(const window_info_t& window_info, const win32_init_ctx_t& win32_init_ctx) {
 
   WNDCLASS wc = {};
   wc.style = CS_HREDRAW | CS_VREDRAW;
@@ -106,17 +107,32 @@ void init_platform_specific(const window_info_t& window_info, const win32_init_c
   ShowWindow(hwd, win32_init_ctx.n_show_state);
 
   i_win32Context.hwd = hwd;
+
+  g_app_state.running = true;
+  while (g_app_state.running) {
+    MSG msg{};
+    while (PeekMessage(&msg, i_win32Context.hwd, 0, 0, PM_NOREMOVE)) {
+      bool quitMsg = GetMessage(&msg, NULL, 0, 0) == 0;
+      if (quitMsg) {
+        g_app_state.running = false;
+        break;
+      }
+      TranslateMessage(&msg);
+      DispatchMessage(&msg);
+    }
+  }
+
 }
 
-void poll_events() {
-  MSG msg{};
-  while (PeekMessage(&msg, i_win32Context.hwd, 0, 0, PM_NOREMOVE)) {
-    bool quitMsg = GetMessage(&msg, NULL, 0, 0) == 0;
-    if (quitMsg) {
-      g_app_state.running = false;
-      break;
-    }
-    TranslateMessage(&msg);
-    DispatchMessage(&msg);
-  }
-}
+// void poll_events() {
+//   MSG msg{};
+//   while (PeekMessage(&msg, i_win32Context.hwd, 0, 0, PM_NOREMOVE)) {
+//     bool quitMsg = GetMessage(&msg, NULL, 0, 0) == 0;
+//     if (quitMsg) {
+//       g_app_state.running = false;
+//       break;
+//     }
+//     TranslateMessage(&msg);
+//     DispatchMessage(&msg);
+//   }
+// }

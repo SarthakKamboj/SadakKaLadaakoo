@@ -1,10 +1,10 @@
 #include "app.h"
 
-#ifdef SKL_WINDOWS
+#if defined(SKL_WINDOWS)
 #include "win32/skl_win32.h"
-#endif
-
+#elif defined(SKL_MAC)
 #include "macos/skl_macos.h"
+#endif
 
 #include "app.h"
 #include <string>

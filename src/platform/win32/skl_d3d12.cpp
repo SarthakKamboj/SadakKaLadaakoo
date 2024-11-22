@@ -442,7 +442,7 @@ void render_d3d12_frame() {
 
   d3d_ctx.cmd_list->SetGraphicsRootSignature(d3d_ctx.root_sig.Get());
 
-  float mouse_pos[2] = {g_app_state.mouse_x * 2 - 1, (1-g_app_state.mouse_y) * 2 - 1};
+  float mouse_pos[2] = {g_app_state.input.mouse_x * 2 - 1, (1-g_app_state.input.mouse_y) * 2 - 1};
   float color[3] = {1.0f, 0, 1.0f};
   float constants[NUM_CONSTS] = {
     color[0], color[1], color[2], 0,

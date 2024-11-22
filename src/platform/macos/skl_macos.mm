@@ -100,6 +100,9 @@
 }
 
 - (void) drawInMTKView:(MTKView *) view {
+    
+    update();
+    
     id<MTLCommandBuffer> cmd_buffer = [metal_cmd_queue commandBuffer];
     id<MTLRenderCommandEncoder> render_cmd_encoder = [cmd_buffer renderCommandEncoderWithDescriptor:view.currentRenderPassDescriptor];
     
@@ -118,7 +121,7 @@
 
 @end
 
-void init_platform_specific(const window_info_t& window_info, const mac_init_ctx_t& init_ctx) {
+void app_run_platform_specific(const window_info_t& window_info, const mac_init_ctx_t& init_ctx) {
     AppDelegate* app_delegate = [[AppDelegate alloc] init];
     app_delegate.width = window_info.width;
     app_delegate.height = window_info.height;

@@ -43,4 +43,4 @@ struct mac_init_ctx_t {};
 
 @end
 
-void init_platform_specific(const window_info_t& window_info, const mac_init_ctx_t& init_ctx);
+void app_run_platform_specific(const window_info_t& window_info, const mac_init_ctx_t& init_ctx);

@@ -9,6 +9,7 @@
 #include <string>
 
 #include "entities.h"
+#include "media/video/mp4.h"
 
 static character_t character;
 
@@ -20,7 +21,15 @@ void app_run(const platform_init_ctx_t& init_ctx) {
     window_info.height = 450;
     const char* name = "SadakKaLadaakoo";
     memcpy(window_info.name, name, strlen(name)+1);
-
+    
+#if defined(SKL_MAC)
+    const char* video_path = "/Users/sarthakkamboj/projects/SadakKaLadaakoo/sample.mp4";
+#else
+    const char* video_path = "";
+#endif
+    
+    load_mp4(video_path);
+    
     character.transform_id = create_transform();
     character.render_options_id = create_render_options();
 

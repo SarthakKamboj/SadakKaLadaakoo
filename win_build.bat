@@ -6,6 +6,7 @@ REM https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-cr
 cl /EHsc /W4  ^
     src\win32_main.cpp src\platform\app.cpp  ^
     src\platform\win32\skl_d3d12.cpp src\platform\win32\skl_win32.cpp   ^
+    src\utils\skl_mem.cpp src\media\video\mp4.cpp ^
     /Fe:main.exe  ^
     /I external/DirectX-Headers/include/directx  ^
     /I src  ^

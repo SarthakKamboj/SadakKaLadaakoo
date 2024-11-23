@@ -35,7 +35,7 @@ void update() {
 
     render_options_t* render_options = get_render_options(character.render_options_id);
     render_options->color[0] = 1.0f;
-    render_options->color[1] = 0.0f;
+    render_options->color[1] = 1.0f;
     render_options->color[2] = 1.0f;
 }
 

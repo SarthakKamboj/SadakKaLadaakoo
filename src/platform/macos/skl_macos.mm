@@ -9,8 +9,43 @@
 
 #include "defines.h"
 #include "geometry.h"
+#include "shaders/macos/shader.h"
+#include "entities.h"
 
-#include <AppKit/NSWindow.h>
+extern app_state_t g_app_state;
+
+@implementation GameWindow
+
+@synthesize mtk_view;
+
+-(instancetype)init:(NSRect)content_rect mtk_view:(MTKView *)_mtk_view {
+    self = [super initWithContentRect:content_rect styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskClosable backing:NSBackingStoreBuffered defer:false];
+    if (self) {
+        [self setAcceptsMouseMovedEvents:true];
+        mtk_view = _mtk_view;
+    }
+    return self;
+}
+
+- (void)mouseDown:(NSEvent *)event {
+    SKL_LOG("mouse down detected");
+}
+
+- (void)mouseMoved:(NSEvent*)event {
+    NSEventType event_type = [event type];
+    if (event_type != NSEventTypeMouseMoved) {
+        SKL_LOG("event type not mouse moved");
+    } else {
+        NSPoint point = [event locationInWindow];
+        NSRect bounds = [mtk_view bounds];
+        SKL_LOG("mouse pos: %f %f", point.x, point.y);
+        SKL_LOG("bounds: %f %f", bounds.size.width, bounds.size.height);
+        g_app_state.input.mouse_x = point.x / bounds.size.width;
+        g_app_state.input.mouse_y = 1.0f - (point.y / bounds.size.height);
+    }
+}
+
+@end
 
 @implementation AppDelegate
 
@@ -31,12 +66,10 @@
     content_rect.size.width = width;
     content_rect.size.height = height;
     
-    window = [[NSWindow alloc] initWithContentRect:content_rect styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskClosable backing:NSBackingStoreBuffered defer:false];
-    
     mtk_view = [[MTKView alloc] initWithFrame:content_rect device:metal_device];
     [mtk_view setColorPixelFormat:MTLPixelFormatBGRA8Unorm];
     
-    MTLClearColor clear_color = {0,0.5f,1.0f,1};
+    MTLClearColor clear_color = {0,0.0f,0.0f,1};
     [mtk_view setClearColor:clear_color];
     
     custom_mtk_delegate = [[CustomMTKDelegate alloc] initWithDevice:metal_device];
@@ -44,6 +77,7 @@
     [mtk_view setDelegate:custom_mtk_delegate];
     
     NSString* title_ns = [NSString stringWithUTF8String:title];
+    window = [[GameWindow alloc] init:content_rect mtk_view:mtk_view];
     [window setTitle:title_ns];
     [window setContentView:mtk_view];
     [window makeKeyAndOrderFront:nil];
@@ -61,6 +95,7 @@
 @synthesize metal_device;
 @synthesize metal_cmd_queue;
 @synthesize vert_buffer;
+@synthesize uniform_buffer;
 @synthesize render_pipeline_state;
 
 - (instancetype)initWithDevice:(id<MTLDevice>) _metal_device {
@@ -79,6 +114,11 @@
         void* vert_buffer_ptr = [vert_buffer contents];
         memcpy(vert_buffer_ptr, verts, sizeof(verts));
         [vert_buffer didModifyRange:NSMakeRange(0, [vert_buffer length] )];
+        
+        uniform_buffer = [metal_device newBufferWithLength:sizeof(uniform_data_t) options:MTLResourceStorageModeManaged];
+        void* uniform_buffer_ptr = [uniform_buffer contents];
+        memset(uniform_buffer_ptr, 0, sizeof(uniform_data_t));
+        [uniform_buffer didModifyRange:NSMakeRange(0, [uniform_buffer length] )];
         
         id<MTLLibrary> metal_libray = [metal_device newDefaultLibrary];
         NSString* vert_name = @"vertex_main";
@@ -105,12 +145,30 @@
     
     id<MTLCommandBuffer> cmd_buffer = [metal_cmd_queue commandBuffer];
     id<MTLRenderCommandEncoder> render_cmd_encoder = [cmd_buffer renderCommandEncoderWithDescriptor:view.currentRenderPassDescriptor];
-    
     [render_cmd_encoder setRenderPipelineState:render_pipeline_state];
-    [render_cmd_encoder setVertexBuffer:vert_buffer offset:0 atIndex:0];
-    [render_cmd_encoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:3];
+
+    for (int i = 0; i < 1; i++) {
+        transform_t* transform = get_transform_from_id(i);
+        render_options_t* render_options = get_render_options(i);
+        
+        void* uniform_buffer_ptr = [uniform_buffer contents];
+        uniform_data_t uniform_data{};
+        uniform_data.mouse_pos_x = (transform->screen_x_pos * 2.f) - 1.f;
+        uniform_data.mouse_pos_y = (transform->screen_y_pos * -2.f) + 1.f;
+        uniform_data.color[0] = render_options->color[0];
+        uniform_data.color[1] = render_options->color[1];
+        uniform_data.color[2] = render_options->color[2];
+        
+        memcpy(uniform_buffer_ptr, &uniform_data, sizeof(uniform_data_t));
+        [uniform_buffer didModifyRange:NSMakeRange(0, [uniform_buffer length] )];
+        
+        [render_cmd_encoder setVertexBuffer:vert_buffer offset:0 atIndex:0];
+        [render_cmd_encoder setVertexBuffer:uniform_buffer offset:0 atIndex:1];
+        
+        [render_cmd_encoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:3];
+    }
     [render_cmd_encoder endEncoding];
-    
+        
     [cmd_buffer presentDrawable:view.currentDrawable];
     [cmd_buffer commit];
 }
@@ -135,13 +193,5 @@ void app_run_platform_specific(const window_info_t& window_info, const mac_init_
     NSApplication* app = [NSApplication sharedApplication];
     [app setDelegate:app_delegate];
     [NSApp run];
-    
-}
-
-void poll_events() {
-    
-}
-
-void render_frame() {
     
 }

@@ -14,6 +14,8 @@
 		6F0084452CEC7C88007B86FA /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F0084442CEC7C88007B86FA /* MetalKit.framework */; };
 		6F0084472CEDB072007B86FA /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F0084462CEDB072007B86FA /* AppKit.framework */; };
 		6F00844A2CEDC932007B86FA /* shader.metal in Sources */ = {isa = PBXBuildFile; fileRef = 6F0084492CEDC932007B86FA /* shader.metal */; };
+		6F0084562CF18B4E007B86FA /* mp4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F0084532CF18B4E007B86FA /* mp4.cpp */; };
+		6F00845B2CF18B60007B86FA /* skl_mem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F0084592CF18B60007B86FA /* skl_mem.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -43,6 +45,12 @@
 		6F00844B2CEF34F5007B86FA /* geometry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = geometry.h; sourceTree = "<group>"; };
 		6F00844F2CF17597007B86FA /* entities.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = entities.h; sourceTree = "<group>"; };
 		6F0084502CF18134007B86FA /* shader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = shader.h; sourceTree = "<group>"; };
+		6F0084512CF18B3C007B86FA /* defaults.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = defaults.h; sourceTree = "<group>"; };
+		6F0084522CF18B4E007B86FA /* mp4.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mp4.h; sourceTree = "<group>"; };
+		6F0084532CF18B4E007B86FA /* mp4.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = mp4.cpp; sourceTree = "<group>"; };
+		6F0084572CF18B60007B86FA /* skl_fixed_pt.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = skl_fixed_pt.h; sourceTree = "<group>"; };
+		6F0084582CF18B60007B86FA /* skl_mem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = skl_mem.h; sourceTree = "<group>"; };
+		6F0084592CF18B60007B86FA /* skl_mem.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = skl_mem.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,9 +71,12 @@
 			isa = PBXGroup;
 			children = (
 				6F00844B2CEF34F5007B86FA /* geometry.h */,
+				6F0084512CF18B3C007B86FA /* defaults.h */,
 				6F00844F2CF17597007B86FA /* entities.h */,
 				6F0084112CEC7748007B86FA /* mac_main.mm */,
 				6F00843D2CEC7B80007B86FA /* defines.h */,
+				6F00845A2CF18B60007B86FA /* utils */,
+				6F0084552CF18B4E007B86FA /* media */,
 				6F00843C2CEC7B6C007B86FA /* shaders */,
 				6F0084342CEC7B43007B86FA /* platform */,
 				6F0084412CEC7C82007B86FA /* Frameworks */,
@@ -125,6 +136,33 @@
 				6F0084422CEC7C82007B86FA /* Metal.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		6F0084542CF18B4E007B86FA /* video */ = {
+			isa = PBXGroup;
+			children = (
+				6F0084522CF18B4E007B86FA /* mp4.h */,
+				6F0084532CF18B4E007B86FA /* mp4.cpp */,
+			);
+			path = video;
+			sourceTree = "<group>";
+		};
+		6F0084552CF18B4E007B86FA /* media */ = {
+			isa = PBXGroup;
+			children = (
+				6F0084542CF18B4E007B86FA /* video */,
+			);
+			path = media;
+			sourceTree = "<group>";
+		};
+		6F00845A2CF18B60007B86FA /* utils */ = {
+			isa = PBXGroup;
+			children = (
+				6F0084572CF18B60007B86FA /* skl_fixed_pt.h */,
+				6F0084582CF18B60007B86FA /* skl_mem.h */,
+				6F0084592CF18B60007B86FA /* skl_mem.cpp */,
+			);
+			path = utils;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -189,7 +227,9 @@
 			files = (
 				6F00844A2CEDC932007B86FA /* shader.metal in Sources */,
 				6F0084362CEC7B43007B86FA /* app.cpp in Sources */,
+				6F00845B2CF18B60007B86FA /* skl_mem.cpp in Sources */,
 				6F0084122CEC7761007B86FA /* mac_main.mm in Sources */,
+				6F0084562CF18B4E007B86FA /* mp4.cpp in Sources */,
 				6F0084402CEC7C62007B86FA /* skl_macos.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

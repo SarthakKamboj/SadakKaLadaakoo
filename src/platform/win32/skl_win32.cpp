@@ -46,7 +46,9 @@ LRESULT CALLBACK window_procedure(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hwnd, &ps);
         update();
-        render_frame();
+        for (int i = 0; i < 1; i++) {
+          render_d3d12_frame(get_transform_from_id(i), get_render_options(i));
+        }
         EndPaint(hwnd, &ps);
       }
       return 0;
@@ -123,16 +125,3 @@ void app_run_platform_specific(const window_info_t& window_info, const win32_ini
   }
 
 }
-
-// void poll_events() {
-//   MSG msg{};
-//   while (PeekMessage(&msg, i_win32Context.hwd, 0, 0, PM_NOREMOVE)) {
-//     bool quitMsg = GetMessage(&msg, NULL, 0, 0) == 0;
-//     if (quitMsg) {
-//       g_app_state.running = false;
-//       break;
-//     }
-//     TranslateMessage(&msg);
-//     DispatchMessage(&msg);
-//   }
-// }

@@ -424,7 +424,7 @@ void init_d3d12(HWND hwnd) {
   SKL_LOG("successfully initialized D3d12");
 }
 
-void render_d3d12_frame() {
+void render_d3d12_frame(transform_t* transform, render_options_t* render_options) {
 
   if (S_OK != d3d_ctx.cmd_alloc->Reset()) {
     SKL_LOG("could not reset allocator");
@@ -442,8 +442,8 @@ void render_d3d12_frame() {
 
   d3d_ctx.cmd_list->SetGraphicsRootSignature(d3d_ctx.root_sig.Get());
 
-  float mouse_pos[2] = {g_app_state.input.mouse_x * 2 - 1, (1-g_app_state.input.mouse_y) * 2 - 1};
-  float color[3] = {1.0f, 0, 1.0f};
+  float mouse_pos[2] = {transform->screen_x_pos * 2 - 1, (1-transform->screen_y_pos) * 2 - 1};
+  float color[3] = {render_options->color[0], render_options->color[1], render_options->color[2]};
   float constants[NUM_CONSTS] = {
     color[0], color[1], color[2], 0,
     mouse_pos[0], mouse_pos[1],
@@ -519,8 +519,4 @@ void sync(d3d_ctx_t& context) {
   }
 
   context.frame_idx = context.swap_chain3->GetCurrentBackBufferIndex();
-}
-
-void render_frame() {
-  render_d3d12_frame();
 }

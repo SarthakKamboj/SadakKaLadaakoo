@@ -12,6 +12,8 @@
 
 #include "defines.h"
 #include "geometry.h"
+#include "platform/app.h"
+#include "entities.h"
 
 using namespace Microsoft::WRL;
 
@@ -56,5 +58,5 @@ struct d3d_ctx_t {
 };
 
 void init_d3d12(HWND hwnd);
-void render_d3d12_frame();
+void render_d3d12_frame(transform_t* transform, render_options_t* render_options);
 void sync(d3d_ctx_t& context);

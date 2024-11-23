@@ -41,6 +41,8 @@
 		6F0084462CEDB072007B86FA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		6F0084492CEDC932007B86FA /* shader.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = shader.metal; sourceTree = "<group>"; };
 		6F00844B2CEF34F5007B86FA /* geometry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = geometry.h; sourceTree = "<group>"; };
+		6F00844F2CF17597007B86FA /* entities.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = entities.h; sourceTree = "<group>"; };
+		6F0084502CF18134007B86FA /* shader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = shader.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +63,7 @@
 			isa = PBXGroup;
 			children = (
 				6F00844B2CEF34F5007B86FA /* geometry.h */,
+				6F00844F2CF17597007B86FA /* entities.h */,
 				6F0084112CEC7748007B86FA /* mac_main.mm */,
 				6F00843D2CEC7B80007B86FA /* defines.h */,
 				6F00843C2CEC7B6C007B86FA /* shaders */,
@@ -100,6 +103,7 @@
 		6F0084392CEC7B6C007B86FA /* macos */ = {
 			isa = PBXGroup;
 			children = (
+				6F0084502CF18134007B86FA /* shader.h */,
 				6F0084492CEDC932007B86FA /* shader.metal */,
 			);
 			path = macos;

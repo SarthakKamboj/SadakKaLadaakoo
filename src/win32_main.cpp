@@ -18,8 +18,8 @@ int WINAPI wWinMain(HINSTANCE h_instance, HINSTANCE disregard, PWSTR p_cmd_line_
   win32_init_ctx.p_cmd_line_args = p_cmd_line_args;
   win32_init_ctx.n_show_state = n_show_state;
 
-  init(win32_init_ctx);
-  run();
+  app_run(win32_init_ctx);
+  // run();
 
   return 0;
 }

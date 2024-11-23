@@ -6,9 +6,14 @@ struct window_info_t {
   char name[256]{};
 };
 
-struct app_state_t {
+struct input_t {
+  // top left is (0,0)
   float mouse_x = 0;
   float mouse_y = 0;
+};
+
+struct app_state_t {
+  input_t input;
   bool running = false;
 };
 
@@ -20,10 +25,12 @@ struct mac_init_ctx_t;
 typedef mac_init_ctx_t platform_init_ctx_t;
 #endif
 
-void init(const platform_init_ctx_t& init_ctx);
+void app_run(const platform_init_ctx_t& init_ctx);
 
-void run();
-
-void poll_events();
 void update();
-void render_frame();
+
+struct render_options_t {
+  float color[3] = {0,0,0};
+};
+int create_render_options();
+render_options_t* get_render_options(int id);

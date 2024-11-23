@@ -7,6 +7,7 @@
 
 #include "../app.h"
 
+#import <AppKit/NSWindow.h>
 #import <AppKit/NSApplication.h>
 #import <Metal/Metal.h>
 #import <MetalKit/MTKView.h>
@@ -14,6 +15,7 @@
 struct mac_init_ctx_t {};
 
 @class CustomMTKDelegate;
+@class GameWindow;
 
 @interface AppDelegate : NSObject<NSApplicationDelegate>
 
@@ -21,13 +23,22 @@ struct mac_init_ctx_t {};
 @property(assign) int height;
 @property(assign) const char* _Nonnull title;
 @property(retain) id<MTLDevice> _Nonnull metal_device;
-@property NSWindow* _Nonnull window;
+@property GameWindow* _Nonnull window;
 @property MTKView* _Nonnull mtk_view;
 @property CustomMTKDelegate* _Nonnull custom_mtk_delegate;
 
 -(void)applicationDidFinishLaunching:(NSNotification*)notification;
-- (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender;
+-(BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender;
 
+@end
+
+@interface GameWindow : NSWindow
+
+@property MTKView* _Nonnull mtk_view;
+
+-(instancetype)init:(NSRect)content_rect mtk_view:(MTKView*)_mtk_view;
+-(void)mouseDown:(NSEvent *)event;
+-(void)mouseMoved:(NSEvent*)event;
 @end
 
 @interface CustomMTKDelegate : NSObject<MTKViewDelegate>
@@ -35,6 +46,7 @@ struct mac_init_ctx_t {};
 @property(retain) id<MTLDevice> _Nonnull metal_device;
 @property id<MTLCommandQueue> _Nonnull metal_cmd_queue;
 @property id<MTLBuffer> _Nonnull vert_buffer;
+@property id<MTLBuffer> _Nonnull uniform_buffer;
 @property id<MTLRenderPipelineState> _Nonnull render_pipeline_state;
 
 - (instancetype)initWithDevice:(id<MTLDevice>) metal_device;
@@ -43,4 +55,4 @@ struct mac_init_ctx_t {};
 
 @end
 
-void init_platform_specific(const window_info_t& window_info, const mac_init_ctx_t& init_ctx);
+void app_run_platform_specific(const window_info_t& window_info, const mac_init_ctx_t& init_ctx);

@@ -13,8 +13,7 @@
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
         mac_init_ctx_t init_ctx{};
-        init(init_ctx);
-        run();
+        app_run(init_ctx);
     }
     return 0;
 }

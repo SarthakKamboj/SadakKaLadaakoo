@@ -15,6 +15,8 @@
 		6F0084472CEDB072007B86FA /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F0084462CEDB072007B86FA /* AppKit.framework */; };
 		6F00844A2CEDC932007B86FA /* shader.metal in Sources */ = {isa = PBXBuildFile; fileRef = 6F0084492CEDC932007B86FA /* shader.metal */; };
 		6F00960E2D0AC874007B86FA /* libassimpd.5.4.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F0095E42D09A091007B86FA /* libassimpd.5.4.3.dylib */; };
+		6F0096252D0AD936007B86FA /* box.glb in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6F0096232D0AD923007B86FA /* box.glb */; };
+		6F00962B2D0ADB4D007B86FA /* defines.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F00962A2D0ADB48007B86FA /* defines.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -27,12 +29,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 		};
-		6F0095FC2D0AC25B007B86FA /* CopyFiles */ = {
+		6F00961B2D0AD4E1007B86FA /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
-			dstSubfolderSpec = 16;
+			dstSubfolderSpec = 7;
 			files = (
+				6F0096252D0AD936007B86FA /* box.glb in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -50,7 +53,6 @@
 		6F0084442CEC7C88007B86FA /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		6F0084462CEDB072007B86FA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		6F0084492CEDC932007B86FA /* shader.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = shader.metal; sourceTree = "<group>"; };
-		6F00844B2CEF34F5007B86FA /* geometry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = geometry.h; sourceTree = "<group>"; };
 		6F00844F2CF17597007B86FA /* entities.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = entities.h; sourceTree = "<group>"; };
 		6F0084502CF18134007B86FA /* shader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = shader.h; sourceTree = "<group>"; };
 		6F00845C2D099874007B86FA /* unit */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = unit; path = ../external/assimp/bin/unit; sourceTree = "<group>"; };
@@ -3915,7 +3917,20 @@
 		6F0095D72D099B70007B86FA /* SECURITY.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SECURITY.md; sourceTree = "<group>"; };
 		6F0095E42D09A091007B86FA /* libassimpd.5.4.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libassimpd.5.4.3.dylib; path = ../external/assimp/xcode_bin/bin/Debug/libassimpd.5.4.3.dylib; sourceTree = "<group>"; };
 		6F0095EE2D09A595007B86FA /* libassimp.5.4.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libassimp.5.4.3.dylib; path = ../external/assimp/xcode_bin/bin/Release/libassimp.5.4.3.dylib; sourceTree = "<group>"; };
+		6F0096232D0AD923007B86FA /* box.glb */ = {isa = PBXFileReference; lastKnownFileType = file; path = box.glb; sourceTree = "<group>"; };
+		6F00962A2D0ADB48007B86FA /* defines.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; path = defines.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		6F0096262D0AD988007B86FA /* geometry */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+				geometry.cpp = sourcecode.cpp.objcpp;
+			};
+			path = geometry;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		6F0084012CEC75F7007B86FA /* Frameworks */ = {
@@ -3935,10 +3950,12 @@
 		6F0083FB2CEC75F7007B86FA = {
 			isa = PBXGroup;
 			children = (
-				6F00844B2CEF34F5007B86FA /* geometry.h */,
+				6F0096262D0AD988007B86FA /* geometry */,
+				6F0096242D0AD923007B86FA /* assets */,
 				6F00844F2CF17597007B86FA /* entities.h */,
 				6F0084112CEC7748007B86FA /* mac_main.mm */,
 				6F00843D2CEC7B80007B86FA /* defines.h */,
+				6F00962A2D0ADB48007B86FA /* defines.cpp */,
 				6F00843C2CEC7B6C007B86FA /* shaders */,
 				6F0084342CEC7B43007B86FA /* platform */,
 				6F0084412CEC7C82007B86FA /* Frameworks */,
@@ -12735,6 +12752,15 @@
 			path = "../external/DirectX-Headers";
 			sourceTree = "<group>";
 		};
+		6F0096242D0AD923007B86FA /* assets */ = {
+			isa = PBXGroup;
+			children = (
+				6F0096232D0AD923007B86FA /* box.glb */,
+			);
+			name = assets;
+			path = ../assets;
+			sourceTree = SOURCE_ROOT;
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -12745,12 +12771,15 @@
 				6F0084002CEC75F7007B86FA /* Sources */,
 				6F0084012CEC75F7007B86FA /* Frameworks */,
 				6F0084022CEC75F7007B86FA /* CopyFiles */,
-				6F0095FC2D0AC25B007B86FA /* CopyFiles */,
 				6F00960D2D0AC663007B86FA /* ShellScript */,
+				6F00961B2D0AD4E1007B86FA /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				6F0096262D0AD988007B86FA /* geometry */,
 			);
 			name = "SadakKaLadaakoo-Mac";
 			packageProductDependencies = (
@@ -12830,6 +12859,7 @@
 				6F00844A2CEDC932007B86FA /* shader.metal in Sources */,
 				6F0084362CEC7B43007B86FA /* app.cpp in Sources */,
 				6F0084122CEC7761007B86FA /* mac_main.mm in Sources */,
+				6F00962B2D0ADB4D007B86FA /* defines.cpp in Sources */,
 				6F0084402CEC7C62007B86FA /* skl_macos.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

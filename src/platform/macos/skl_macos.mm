@@ -7,10 +7,8 @@
 
 #include "skl_macos.h"
 
-#include "assimp/Importer.hpp"
-
 #include "defines.h"
-#include "geometry.h"
+#include "geometry/model.h"
 #include "shaders/macos/shader.h"
 #include "entities.h"
 
@@ -40,8 +38,8 @@ extern app_state_t g_app_state;
     } else {
         NSPoint point = [event locationInWindow];
         NSRect bounds = [mtk_view bounds];
-        SKL_LOG("mouse pos: %f %f", point.x, point.y);
-        SKL_LOG("bounds: %f %f", bounds.size.width, bounds.size.height);
+        // SKL_LOG("mouse pos: %f %f", point.x, point.y);
+        // SKL_LOG("bounds: %f %f", bounds.size.width, bounds.size.height);
         g_app_state.input.mouse_x = point.x / bounds.size.width;
         g_app_state.input.mouse_y = 1.0f - (point.y / bounds.size.height);
     }
@@ -112,11 +110,15 @@ extern app_state_t g_app_state;
             { { -0.25f, -0.25f,  0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } },
         };
         
-        Assimp::Importer importer;
+        NSBundle* asset_bundle = [NSBundle mainBundle];
+        NSString* box_path_ns = [asset_bundle pathForResource:@"box" ofType:@"glb"];
+        const char* box_path = [box_path_ns UTF8String];
         
-        vert_buffer = [metal_device newBufferWithLength:sizeof(verts) options:MTLResourceStorageModeManaged];
+        model_t model = load_model(box_path);
+        
+        vert_buffer = [metal_device newBufferWithLength:model.num_verts*sizeof(skl_vert_t) options:MTLResourceStorageModeManaged];
         void* vert_buffer_ptr = [vert_buffer contents];
-        memcpy(vert_buffer_ptr, verts, sizeof(verts));
+        memcpy(vert_buffer_ptr, model.verts, model.num_verts*sizeof(skl_vert_t));
         [vert_buffer didModifyRange:NSMakeRange(0, [vert_buffer length] )];
         
         uniform_buffer = [metal_device newBufferWithLength:sizeof(uniform_data_t) options:MTLResourceStorageModeManaged];
@@ -150,7 +152,8 @@ extern app_state_t g_app_state;
     id<MTLCommandBuffer> cmd_buffer = [metal_cmd_queue commandBuffer];
     id<MTLRenderCommandEncoder> render_cmd_encoder = [cmd_buffer renderCommandEncoderWithDescriptor:view.currentRenderPassDescriptor];
     [render_cmd_encoder setRenderPipelineState:render_pipeline_state];
-
+    [render_cmd_encoder setTriangleFillMode:MTLTriangleFillModeLines];
+    
     for (int i = 0; i < 1; i++) {
         transform_t* transform = get_transform_from_id(i);
         render_options_t* render_options = get_render_options(i);
@@ -169,7 +172,7 @@ extern app_state_t g_app_state;
         [render_cmd_encoder setVertexBuffer:vert_buffer offset:0 atIndex:0];
         [render_cmd_encoder setVertexBuffer:uniform_buffer offset:0 atIndex:1];
         
-        [render_cmd_encoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:3];
+        [render_cmd_encoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:36];
     }
     [render_cmd_encoder endEncoding];
         

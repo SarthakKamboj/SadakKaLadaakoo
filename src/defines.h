@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <assert.h>
 
+#import <Foundation/Foundation.h>
+
 #define __SKL_OUT__
 
 #if defined(SKL_WINDOWS)
@@ -13,3 +15,6 @@
 
 #define skl_assert_msg(msg) assert(false, msg)
 #define skl_assert(exp, msg) assert(exp, msg)
+
+NSString* c_string_to_ns_string(const char* c_str);
+const char* ns_string_to_c_string(NSString* ns_str);

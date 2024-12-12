@@ -7,6 +7,8 @@
 
 #include "skl_macos.h"
 
+#include "assimp/Importer.hpp"
+
 #include "defines.h"
 #include "geometry.h"
 #include "shaders/macos/shader.h"
@@ -109,7 +111,9 @@ extern app_state_t g_app_state;
             { { 0.25f, -0.25f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
             { { -0.25f, -0.25f,  0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } },
         };
-    
+        
+        Assimp::Importer importer;
+        
         vert_buffer = [metal_device newBufferWithLength:sizeof(verts) options:MTLResourceStorageModeManaged];
         void* vert_buffer_ptr = [vert_buffer contents];
         memcpy(vert_buffer_ptr, verts, sizeof(verts));

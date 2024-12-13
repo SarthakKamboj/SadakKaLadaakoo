@@ -17,6 +17,7 @@
 		6F00960E2D0AC874007B86FA /* libassimpd.5.4.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F0095E42D09A091007B86FA /* libassimpd.5.4.3.dylib */; };
 		6F0096252D0AD936007B86FA /* box.glb in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6F0096232D0AD923007B86FA /* box.glb */; };
 		6F00962B2D0ADB4D007B86FA /* defines.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F00962A2D0ADB48007B86FA /* defines.cpp */; };
+		6F00962E2D0BC398007B86FA /* arrow.glb in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6F00962D2D0BC398007B86FA /* arrow.glb */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -35,6 +36,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 7;
 			files = (
+				6F00962E2D0BC398007B86FA /* arrow.glb in CopyFiles */,
 				6F0096252D0AD936007B86FA /* box.glb in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3919,6 +3921,7 @@
 		6F0095EE2D09A595007B86FA /* libassimp.5.4.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libassimp.5.4.3.dylib; path = ../external/assimp/xcode_bin/bin/Release/libassimp.5.4.3.dylib; sourceTree = "<group>"; };
 		6F0096232D0AD923007B86FA /* box.glb */ = {isa = PBXFileReference; lastKnownFileType = file; path = box.glb; sourceTree = "<group>"; };
 		6F00962A2D0ADB48007B86FA /* defines.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; path = defines.cpp; sourceTree = "<group>"; };
+		6F00962D2D0BC398007B86FA /* arrow.glb */ = {isa = PBXFileReference; lastKnownFileType = file; path = arrow.glb; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -12755,6 +12758,7 @@
 		6F0096242D0AD923007B86FA /* assets */ = {
 			isa = PBXGroup;
 			children = (
+				6F00962D2D0BC398007B86FA /* arrow.glb */,
 				6F0096232D0AD923007B86FA /* box.glb */,
 			);
 			name = assets;

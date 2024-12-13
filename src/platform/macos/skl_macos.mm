@@ -111,7 +111,7 @@ extern app_state_t g_app_state;
         };
         
         NSBundle* asset_bundle = [NSBundle mainBundle];
-        NSString* box_path_ns = [asset_bundle pathForResource:@"box" ofType:@"glb"];
+        NSString* box_path_ns = [asset_bundle pathForResource:@"arrow" ofType:@"glb"];
         const char* box_path = [box_path_ns UTF8String];
         
         model_t model = load_model(box_path);
@@ -152,7 +152,7 @@ extern app_state_t g_app_state;
     id<MTLCommandBuffer> cmd_buffer = [metal_cmd_queue commandBuffer];
     id<MTLRenderCommandEncoder> render_cmd_encoder = [cmd_buffer renderCommandEncoderWithDescriptor:view.currentRenderPassDescriptor];
     [render_cmd_encoder setRenderPipelineState:render_pipeline_state];
-    [render_cmd_encoder setTriangleFillMode:MTLTriangleFillModeLines];
+    // [render_cmd_encoder setTriangleFillMode:MTLTriangleFillModeLines];
     
     for (int i = 0; i < 1; i++) {
         transform_t* transform = get_transform_from_id(i);

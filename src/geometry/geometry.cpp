@@ -35,8 +35,8 @@ model_t load_mesh(const aiNode* node, aiMesh** const ai_meshes) {
             int vert_idx = face.mIndices[j];
             aiVector3D pos = ai_mesh->mVertices[vert_idx];
             skl_vert_t& vert = verts[k];
+            vert.pos = {pos.x, pos.y, pos.z};
             // vert.pos = {pos.x * 0.5f, pos.y * 0.5f, (pos.z * 0.25f) + 0.5f};
-            vert.pos = {pos.x * 0.5f, pos.y * 0.5f, (pos.z * 0.25f) + 0.5f};
             // vert.pos = {pos.x * 0.5f, pos.y * 0.5f, 0};
             SKL_LOG("pos at index %i is (%f, %f, %f)", k, vert.pos.x, vert.pos.y, vert.pos.z);
             // vert.color = {0.25f, 0.41f, 0.88f};

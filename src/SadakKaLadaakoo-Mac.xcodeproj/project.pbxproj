@@ -18,6 +18,7 @@
 		6F0096252D0AD936007B86FA /* box.glb in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6F0096232D0AD923007B86FA /* box.glb */; };
 		6F00962B2D0ADB4D007B86FA /* defines.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F00962A2D0ADB48007B86FA /* defines.cpp */; };
 		6F00962E2D0BC398007B86FA /* arrow.glb in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6F00962D2D0BC398007B86FA /* arrow.glb */; };
+		6F0096322D0EA368007B86FA /* skl_math.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6F0096312D0EA365007B86FA /* skl_math.mm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -3922,6 +3923,8 @@
 		6F0096232D0AD923007B86FA /* box.glb */ = {isa = PBXFileReference; lastKnownFileType = file; path = box.glb; sourceTree = "<group>"; };
 		6F00962A2D0ADB48007B86FA /* defines.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; path = defines.cpp; sourceTree = "<group>"; };
 		6F00962D2D0BC398007B86FA /* arrow.glb */ = {isa = PBXFileReference; lastKnownFileType = file; path = arrow.glb; sourceTree = "<group>"; };
+		6F0096302D0EA1A5007B86FA /* skl_math.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = skl_math.h; sourceTree = "<group>"; };
+		6F0096312D0EA365007B86FA /* skl_math.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = skl_math.mm; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -3953,6 +3956,8 @@
 		6F0083FB2CEC75F7007B86FA = {
 			isa = PBXGroup;
 			children = (
+				6F0096312D0EA365007B86FA /* skl_math.mm */,
+				6F0096302D0EA1A5007B86FA /* skl_math.h */,
 				6F0096262D0AD988007B86FA /* geometry */,
 				6F0096242D0AD923007B86FA /* assets */,
 				6F00844F2CF17597007B86FA /* entities.h */,
@@ -12861,6 +12866,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6F00844A2CEDC932007B86FA /* shader.metal in Sources */,
+				6F0096322D0EA368007B86FA /* skl_math.mm in Sources */,
 				6F0084362CEC7B43007B86FA /* app.cpp in Sources */,
 				6F0084122CEC7761007B86FA /* mac_main.mm in Sources */,
 				6F00962B2D0ADB4D007B86FA /* defines.cpp in Sources */,

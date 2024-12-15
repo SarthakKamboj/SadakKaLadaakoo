@@ -11,6 +11,7 @@
 #include "geometry/model.h"
 #include "shaders/macos/shader.h"
 #include "entities.h"
+#include "skl_math.h"
 
 extern app_state_t g_app_state;
 
@@ -104,14 +105,16 @@ extern app_state_t g_app_state;
         metal_device = _metal_device;
         metal_cmd_queue = [metal_device newCommandQueue];
         
+#if false
         skl_vert_t verts[3] = {
             { { 0.0f, 0.25f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
             { { 0.25f, -0.25f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
             { { -0.25f, -0.25f,  0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } },
         };
+#endif
         
         NSBundle* asset_bundle = [NSBundle mainBundle];
-        NSString* box_path_ns = [asset_bundle pathForResource:@"arrow" ofType:@"glb"];
+        NSString* box_path_ns = [asset_bundle pathForResource:@"box" ofType:@"glb"];
         const char* box_path = [box_path_ns UTF8String];
         
         model_t model = load_model(box_path);
@@ -152,7 +155,7 @@ extern app_state_t g_app_state;
     id<MTLCommandBuffer> cmd_buffer = [metal_cmd_queue commandBuffer];
     id<MTLRenderCommandEncoder> render_cmd_encoder = [cmd_buffer renderCommandEncoderWithDescriptor:view.currentRenderPassDescriptor];
     [render_cmd_encoder setRenderPipelineState:render_pipeline_state];
-    // [render_cmd_encoder setTriangleFillMode:MTLTriangleFillModeLines];
+    [render_cmd_encoder setTriangleFillMode:MTLTriangleFillModeLines];
     
     for (int i = 0; i < 1; i++) {
         transform_t* transform = get_transform_from_id(i);
@@ -162,9 +165,21 @@ extern app_state_t g_app_state;
         uniform_data_t uniform_data{};
         uniform_data.mouse_pos_x = (transform->screen_x_pos * 2.f) - 1.f;
         uniform_data.mouse_pos_y = (transform->screen_y_pos * -2.f) + 1.f;
+        
         uniform_data.color[0] = render_options->color[0];
         uniform_data.color[1] = render_options->color[1];
         uniform_data.color[2] = render_options->color[2];
+        
+        float near_plane = 0.01f;
+        float far_plane = 30.0f;
+        
+        matrix_t scale = transform_mat( 5.f, 1.f );
+        matrix_t pers = pers_mat( near_plane, far_plane );
+        matrix_t ndc = ndc_mat( near_plane, far_plane, 60.0f, g_app_state.window_info.width / g_app_state.window_info.width );
+        
+        uniform_data.world_mat = matrix_to_simd_mat( scale );
+        uniform_data.pers_mat = matrix_to_simd_mat( pers );
+        uniform_data.ndc_mat = matrix_to_simd_mat( ndc );
         
         memcpy(uniform_buffer_ptr, &uniform_data, sizeof(uniform_data_t));
         [uniform_buffer didModifyRange:NSMakeRange(0, [uniform_buffer length] )];

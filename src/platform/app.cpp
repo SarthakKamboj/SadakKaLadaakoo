@@ -15,7 +15,7 @@ static character_t character;
 app_state_t g_app_state;
 
 void app_run(const platform_init_ctx_t& init_ctx) {
-    window_info_t window_info{};
+    window_info_t& window_info = g_app_state.window_info;
     window_info.width = 800;
     window_info.height = 450;
     const char* name = "SadakKaLadaakoo";
@@ -34,9 +34,9 @@ void update() {
     transform->screen_y_pos = g_app_state.input.mouse_y;
 
     render_options_t* render_options = get_render_options(character.render_options_id);
-    render_options->color[0] = 1.0f;
-    render_options->color[1] = 1.0f;
-    render_options->color[2] = 1.0f;
+    render_options->color[0] = 0.1f;
+    render_options->color[1] = 0.3f;
+    render_options->color[2] = 0.88f;
 }
 
 static render_options_t render_options[1];

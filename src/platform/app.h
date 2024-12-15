@@ -14,6 +14,7 @@ struct input_t {
 
 struct app_state_t {
   input_t input;
+    window_info_t window_info;
   bool running = false;
 };
 

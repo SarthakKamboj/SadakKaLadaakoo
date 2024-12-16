@@ -7,12 +7,14 @@
 
 #include "skl_macos.h"
 
+#include <cmath>
+
 #include "defines.h"
 #include "geometry/model.h"
 #include "shaders/macos/shader.h"
 #include "entities.h"
 #include "skl_math.h"
-#include <cmath>
+#include "skl_image.h"
 
 extern app_state_t g_app_state;
 
@@ -78,6 +80,10 @@ extern app_state_t g_app_state;
     custom_mtk_delegate.metal_device = metal_device;
     [mtk_view setDelegate:custom_mtk_delegate];
     
+    [mtk_view setClearDepth:1.0f];
+    [mtk_view setDepthStencilPixelFormat:MTLPixelFormatDepth16Unorm];
+    
+    
     NSString* title_ns = [NSString stringWithUTF8String:title];
     window = [[GameWindow alloc] init:content_rect mtk_view:mtk_view];
     [window setTitle:title_ns];
@@ -99,6 +105,7 @@ extern app_state_t g_app_state;
 @synthesize vert_buffer;
 @synthesize uniform_buffer;
 @synthesize render_pipeline_state;
+@synthesize img_texture;
 
 - (instancetype)initWithDevice:(id<MTLDevice>) _metal_device {
     self = [super init];
@@ -116,9 +123,20 @@ extern app_state_t g_app_state;
         
         NSBundle* asset_bundle = [NSBundle mainBundle];
         NSString* box_path_ns = [asset_bundle pathForResource:@"box" ofType:@"glb"];
+        // NSString* box_path_ns = [asset_bundle pathForResource:@"ferrari" ofType:@"glb"];
+        // NSString* box_path_ns = [asset_bundle pathForResource:@"truck" ofType:@"glb"];
         const char* box_path = [box_path_ns UTF8String];
         
         model_t model = load_model(box_path);
+        
+        NSString* image_path_ns = [asset_bundle pathForResource:@"checker" ofType:@"png"];
+        const char* image_path = [image_path_ns UTF8String];
+        skl_image_t img = load_image(image_path, _metal_device);
+        if (img.valid) {
+            img_texture = img.texture;
+        } else {
+            img_texture = nil;
+        }
         
         vert_buffer = [metal_device newBufferWithLength:model.num_verts*sizeof(skl_vert_t) options:MTLResourceStorageModeManaged];
         void* vert_buffer_ptr = [vert_buffer contents];
@@ -143,6 +161,8 @@ extern app_state_t g_app_state;
         MTLRenderPipelineColorAttachmentDescriptor* color_att_desc = [color_atts objectAtIndexedSubscript:0];
         [color_att_desc setPixelFormat:MTLPixelFormatBGRA8Unorm];
         
+        [pipeline_desc setDepthAttachmentPixelFormat:MTLPixelFormatDepth16Unorm];
+        
         render_pipeline_state = [metal_device newRenderPipelineStateWithDescriptor:pipeline_desc error:nil];
 
     }
@@ -156,7 +176,14 @@ extern app_state_t g_app_state;
     id<MTLCommandBuffer> cmd_buffer = [metal_cmd_queue commandBuffer];
     id<MTLRenderCommandEncoder> render_cmd_encoder = [cmd_buffer renderCommandEncoderWithDescriptor:view.currentRenderPassDescriptor];
     [render_cmd_encoder setRenderPipelineState:render_pipeline_state];
-    [render_cmd_encoder setTriangleFillMode:MTLTriangleFillModeLines];
+    
+    MTLDepthStencilDescriptor* depth_stencil_desc = [[MTLDepthStencilDescriptor alloc] init];
+    depth_stencil_desc.depthWriteEnabled = YES;
+    depth_stencil_desc.depthCompareFunction = MTLCompareFunctionLess;
+    id <MTLDepthStencilState> depth_stencil_state = [metal_device newDepthStencilStateWithDescriptor:depth_stencil_desc];
+    [render_cmd_encoder setDepthStencilState:depth_stencil_state];
+    
+    // [render_cmd_encoder setTriangleFillMode:MTLTriangleFillModeLines];
     
     for (int i = 0; i < 1; i++) {
         transform_t* transform = get_transform_from_id(i);
@@ -176,7 +203,7 @@ extern app_state_t g_app_state;
         
         static unsigned int j = 0;
         // matrix_t scale = transform_mat( 5.f + 5.f * cos(1 / 100.f * (float)j++), 1.f );
-        float y = 5.f * cos(1 / 15.f * (float)j);
+        float y = 5.f * cos(1 / 20.f * (float)j);
         matrix_t c_mat = cam_mat({0,y,0}, {0,0,1.f});
         matrix_t scale = transform_mat( 5.f, 1.f );
         matrix_t pers = pers_mat( near_plane, far_plane );
@@ -200,6 +227,7 @@ extern app_state_t g_app_state;
         
         [render_cmd_encoder setVertexBuffer:vert_buffer offset:0 atIndex:0];
         [render_cmd_encoder setVertexBuffer:uniform_buffer offset:0 atIndex:1];
+        [render_cmd_encoder setFragmentTexture:img_texture atIndex:0];
         
         [render_cmd_encoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:36];
     }

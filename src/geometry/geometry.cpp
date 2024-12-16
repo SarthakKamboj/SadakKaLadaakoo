@@ -38,9 +38,16 @@ model_t load_mesh(const aiNode* node, aiMesh** const ai_meshes) {
             vert.pos = {pos.x, pos.y, pos.z};
             // vert.pos = {pos.x * 0.5f, pos.y * 0.5f, (pos.z * 0.25f) + 0.5f};
             // vert.pos = {pos.x * 0.5f, pos.y * 0.5f, 0};
-            SKL_LOG("pos at index %i is (%f, %f, %f)", k, vert.pos.x, vert.pos.y, vert.pos.z);
+            // SKL_LOG("pos at index %i is (%f, %f, %f)", k, vert.pos.x, vert.pos.y, vert.pos.z);
             // vert.color = {0.25f, 0.41f, 0.88f};
             vert.color = {vert.pos.x, vert.pos.y, vert.pos.z};
+            if (ai_mesh->mNumUVComponents[0] == 2) {
+                aiVector3D* uvw = ai_mesh->mTextureCoords[0];
+                vert.uv.x = uvw[vert_idx].x;
+                vert.uv.y = uvw[vert_idx].y;
+            } else {
+                SKL_LOG("invalid number of uv components: %i", ai_mesh->mNumUVComponents[vert_idx]);
+            }
             k++;
         }
     }
@@ -54,7 +61,7 @@ model_t load_mesh(const aiNode* node, aiMesh** const ai_meshes) {
 model_t load_model(const char* model_path) {
     Assimp::Importer importer;
     
-    const aiScene* main_scene = importer.ReadFile(model_path, aiProcess_Triangulate | aiProcess_FlipWindingOrder);
+    const aiScene* main_scene = importer.ReadFile(model_path, aiProcess_Triangulate /*| aiProcess_FlipWindingOrder*/ );
     SKL_LOG("main scene is %p", main_scene);
     
     model_t model = load_mesh(main_scene->mRootNode, main_scene->mMeshes);

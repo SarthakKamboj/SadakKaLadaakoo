@@ -19,6 +19,11 @@
 		6F00962B2D0ADB4D007B86FA /* defines.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F00962A2D0ADB48007B86FA /* defines.cpp */; };
 		6F00962E2D0BC398007B86FA /* arrow.glb in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6F00962D2D0BC398007B86FA /* arrow.glb */; };
 		6F0096322D0EA368007B86FA /* skl_math.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6F0096312D0EA365007B86FA /* skl_math.mm */; };
+		6F0096352D108A7A007B86FA /* stb_image.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6F0096342D108A74007B86FA /* stb_image.mm */; };
+		6F0096392D108B6F007B86FA /* skl_image.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6F0096382D108B6D007B86FA /* skl_image.mm */; };
+		6F00963B2D108CA9007B86FA /* checker.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6F00963A2D108CA9007B86FA /* checker.png */; };
+		6F00963D2D108DA3007B86FA /* ferrari.glb in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6F00963C2D108DA3007B86FA /* ferrari.glb */; };
+		6F00963F2D108E63007B86FA /* truck.glb in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6F00963E2D108E63007B86FA /* truck.glb */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -37,6 +42,9 @@
 			dstPath = "";
 			dstSubfolderSpec = 7;
 			files = (
+				6F00963F2D108E63007B86FA /* truck.glb in CopyFiles */,
+				6F00963D2D108DA3007B86FA /* ferrari.glb in CopyFiles */,
+				6F00963B2D108CA9007B86FA /* checker.png in CopyFiles */,
 				6F00962E2D0BC398007B86FA /* arrow.glb in CopyFiles */,
 				6F0096252D0AD936007B86FA /* box.glb in CopyFiles */,
 			);
@@ -3925,6 +3933,13 @@
 		6F00962D2D0BC398007B86FA /* arrow.glb */ = {isa = PBXFileReference; lastKnownFileType = file; path = arrow.glb; sourceTree = "<group>"; };
 		6F0096302D0EA1A5007B86FA /* skl_math.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = skl_math.h; sourceTree = "<group>"; };
 		6F0096312D0EA365007B86FA /* skl_math.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = skl_math.mm; sourceTree = "<group>"; };
+		6F0096332D108A5D007B86FA /* stb_image.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stb_image.h; sourceTree = "<group>"; };
+		6F0096342D108A74007B86FA /* stb_image.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = stb_image.mm; sourceTree = "<group>"; };
+		6F0096372D108B49007B86FA /* skl_image.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = skl_image.h; sourceTree = "<group>"; };
+		6F0096382D108B6D007B86FA /* skl_image.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = skl_image.mm; sourceTree = "<group>"; };
+		6F00963A2D108CA9007B86FA /* checker.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = checker.png; sourceTree = "<group>"; };
+		6F00963C2D108DA3007B86FA /* ferrari.glb */ = {isa = PBXFileReference; lastKnownFileType = file; path = ferrari.glb; sourceTree = "<group>"; };
+		6F00963E2D108E63007B86FA /* truck.glb */ = {isa = PBXFileReference; lastKnownFileType = file; path = truck.glb; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -3956,6 +3971,10 @@
 		6F0083FB2CEC75F7007B86FA = {
 			isa = PBXGroup;
 			children = (
+				6F0096382D108B6D007B86FA /* skl_image.mm */,
+				6F0096372D108B49007B86FA /* skl_image.h */,
+				6F0096342D108A74007B86FA /* stb_image.mm */,
+				6F0096332D108A5D007B86FA /* stb_image.h */,
 				6F0096312D0EA365007B86FA /* skl_math.mm */,
 				6F0096302D0EA1A5007B86FA /* skl_math.h */,
 				6F0096262D0AD988007B86FA /* geometry */,
@@ -12763,8 +12782,11 @@
 		6F0096242D0AD923007B86FA /* assets */ = {
 			isa = PBXGroup;
 			children = (
+				6F00963E2D108E63007B86FA /* truck.glb */,
 				6F00962D2D0BC398007B86FA /* arrow.glb */,
 				6F0096232D0AD923007B86FA /* box.glb */,
+				6F00963C2D108DA3007B86FA /* ferrari.glb */,
+				6F00963A2D108CA9007B86FA /* checker.png */,
 			);
 			name = assets;
 			path = ../assets;
@@ -12871,6 +12893,8 @@
 				6F0084122CEC7761007B86FA /* mac_main.mm in Sources */,
 				6F00962B2D0ADB4D007B86FA /* defines.cpp in Sources */,
 				6F0084402CEC7C62007B86FA /* skl_macos.mm in Sources */,
+				6F0096392D108B6F007B86FA /* skl_image.mm in Sources */,
+				6F0096352D108A7A007B86FA /* stb_image.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

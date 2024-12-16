@@ -48,6 +48,7 @@ struct mac_init_ctx_t {};
 @property id<MTLBuffer> _Nonnull vert_buffer;
 @property id<MTLBuffer> _Nonnull uniform_buffer;
 @property id<MTLRenderPipelineState> _Nonnull render_pipeline_state;
+@property id<MTLTexture> img_texture;
 
 - (instancetype)initWithDevice:(id<MTLDevice>) metal_device;
 - (void)drawInMTKView:(MTKView *) view;

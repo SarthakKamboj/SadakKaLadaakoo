@@ -1,5 +1,7 @@
 #pragma once
 
+#include "simd/simd.h"
+
 struct skl_pos_t {
   float x = 0;
   float y = 0;
@@ -14,6 +16,7 @@ struct skl_color_t {
 };
 
 struct skl_vert_t {
-  skl_pos_t pos;
-  skl_color_t color;
+    skl_pos_t pos;
+    skl_color_t color;
+    vector_float2 uv;
 };

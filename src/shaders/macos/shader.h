@@ -15,5 +15,6 @@ struct uniform_data_t {
     simd::float4x4 world_mat;
     simd::float4x4 pers_mat;
     simd::float4x4 ndc_mat;
+    simd::float4x4 cam_mat;
 };
 

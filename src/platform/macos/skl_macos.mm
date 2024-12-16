@@ -12,6 +12,7 @@
 #include "shaders/macos/shader.h"
 #include "entities.h"
 #include "skl_math.h"
+#include <cmath>
 
 extern app_state_t g_app_state;
 
@@ -173,10 +174,23 @@ extern app_state_t g_app_state;
         float near_plane = 0.01f;
         float far_plane = 30.0f;
         
+        static unsigned int j = 0;
+        // matrix_t scale = transform_mat( 5.f + 5.f * cos(1 / 100.f * (float)j++), 1.f );
+        float y = 5.f * cos(1 / 15.f * (float)j);
+        matrix_t c_mat = cam_mat({0,y,0}, {0,0,1.f});
         matrix_t scale = transform_mat( 5.f, 1.f );
         matrix_t pers = pers_mat( near_plane, far_plane );
-        matrix_t ndc = ndc_mat( near_plane, far_plane, 60.0f, g_app_state.window_info.width / g_app_state.window_info.width );
+        float fov = 15.f * cos( 1 / 10000.f * (float)j) + 50.0f;
+        fov = 60.0f;
+        if (j % 10 == 0) {
+            SKL_LOG("fov: %f", fov);
+        }
+        matrix_t ndc = ndc_mat( near_plane, far_plane, fov, g_app_state.window_info.width / g_app_state.window_info.width );
+        // matrix_t ndc = ndc_mat( near_plane, far_plane, 20.0f, g_app_state.window_info.width / g_app_state.window_info.width );
         
+        j++;
+        
+        uniform_data.cam_mat = matrix_to_simd_mat( c_mat );
         uniform_data.world_mat = matrix_to_simd_mat( scale );
         uniform_data.pers_mat = matrix_to_simd_mat( pers );
         uniform_data.ndc_mat = matrix_to_simd_mat( ndc );
